@@ -232,6 +232,521 @@ const ROUTES = [
       [114.01815, 22.20085],
       [114.01753, 22.20042]
     ]
+  },
+  {
+    "id": "stfrancis",
+    "theme": "郊野學園 · 到訪路線",
+    "name": "往聖方濟校園",
+    "area": "碼頭至芝麻坑路",
+    "duration": "約 20–25 分鐘（約 1.4 公里）",
+    "color": "#4fa3c7",
+    "blurb": "跟隨明愛陳震夏郊野學園的到訪路線圖，由碼頭經東灣、黑排路與明暉路，走到芝麻坑路的聖方濟校園。路徑按開放街圖的道路繪畫。",
+    "credit": "相片及路線來源：明愛陳震夏郊野學園路線圖（Route to St. Francis Campus）",
+    "stops": [
+      {
+        "name": "長洲渡輪碼頭",
+        "lng": 114.02834,
+        "lat": 22.2086,
+        "text": "背向渡輪碼頭向右行入中央廣場。",
+        "en": "Back to the ferry pier, turn right, then turn into the Centrium."
+      },
+      {
+        "name": "東灣路",
+        "lng": 114.02943,
+        "lat": 22.2086,
+        "text": "沿東灣路往海灘方向行。",
+        "en": "Walk along Tung Wan Road towards the beach."
+      },
+      {
+        "name": "東灣海灘（長洲東堤路口）",
+        "lng": 114.03094,
+        "lat": 22.209,
+        "text": "沿海灘往東行。",
+        "en": "Walk eastwards along the beach."
+      },
+      {
+        "name": "直升機坪・黑排路",
+        "lng": 114.03339,
+        "lat": 22.20782,
+        "text": "經過直升機坪轉入黑排路。",
+        "en": "Walk pass Helicopter Pad, turn into Hak Pai Road."
+      },
+      {
+        "name": "觀音灣泳灘更衣室",
+        "lng": 114.03408,
+        "lat": 22.20721,
+        "text": "經過觀音灣泳灘更衣室，在分岔路轉入斜路。",
+        "en": "Go pass shower facilities, turn right and go uphill.",
+        "photo": {
+          "src": "images/st-francis/05-kwun-yam-beach-showers.jpg",
+          "alt": "觀音灣泳灘更衣室旁的路，左邊是沙灘與枱櫈",
+          "w": 660,
+          "h": 436
+        },
+        "credit": "相片及路線來源：明愛陳震夏郊野學園路線圖（Route to St. Francis Campus）"
+      },
+      {
+        "name": "觀音灣變電站・明暉路口",
+        "lng": 114.03472,
+        "lat": 22.20623,
+        "text": "在觀音灣變電站轉左，在十字路口轉入明暉路。",
+        "en": "Facing Kwun Yam Wan Substation, turn left to crossroad. Head to Ming Fai Road and walk uphill.",
+        "photo": {
+          "src": "images/st-francis/06-substation-ming-fai-road.jpg",
+          "alt": "明暉路口一帶的上坡路，左邊有綠瓦紅柱的建築",
+          "w": 623,
+          "h": 351
+        },
+        "credit": "相片及路線來源：明愛陳震夏郊野學園路線圖（Route to St. Francis Campus）"
+      },
+      {
+        "name": "明暉路垃圾站",
+        "lng": 114.03629,
+        "lat": 22.20597,
+        "text": "沿明暉路直行，經過垃圾站。",
+        "en": "Walk along Ming Fai Road, pass the Refuse Collection Point.",
+        "approx": true
+      },
+      {
+        "name": "芝麻坑路分岔口",
+        "lng": 114.03725,
+        "lat": 22.20564,
+        "text": "在分岔路口沿紅色磚路一直行。",
+        "en": "At the junction, follow the brick pavement to our Campus.",
+        "photo": {
+          "src": "images/st-francis/08-brick-pavement-junction.jpg",
+          "alt": "分岔路口，前方是通往校園的紅色磚路",
+          "w": 535,
+          "h": 301
+        },
+        "credit": "相片及路線來源：明愛陳震夏郊野學園路線圖（Route to St. Francis Campus）"
+      },
+      {
+        "name": "聖方濟校園",
+        "lng": 114.03746,
+        "lat": 22.20748,
+        "text": "明愛陳震夏郊野學園聖方濟校園，即本路線終點。地址：香港長洲芝麻坑路三十九號。電話：2981 1899。",
+        "en": "Caritas Chan Chun Ha Field Studies Centre, St. Francis Campus. 39 Chi Ma Hang Road, Cheung Chau, N.T., H.K. Tel: 2981 1899.",
+        "photo": {
+          "src": "images/st-francis/09-campus.jpg",
+          "alt": "聖方濟校園建築（取自路線圖上的小圖）",
+          "w": 366,
+          "h": 140,
+          "note": "取自路線圖上的小圖，解像度較低"
+        },
+        "credit": "相片及路線來源：明愛陳震夏郊野學園路線圖（Route to St. Francis Campus）"
+      }
+    ],
+    "path": [
+      [
+        114.028382,
+        22.208606
+      ],
+      [
+        114.028387,
+        22.208576
+      ],
+      [
+        114.028727,
+        22.208622
+      ],
+      [
+        114.028749,
+        22.208388
+      ],
+      [
+        114.02903,
+        22.208424
+      ],
+      [
+        114.029031,
+        22.208398
+      ],
+      [
+        114.029186,
+        22.208414
+      ],
+      [
+        114.029456,
+        22.208444
+      ],
+      [
+        114.029449,
+        22.208537
+      ],
+      [
+        114.029432,
+        22.208602
+      ],
+      [
+        114.02943,
+        22.208602
+      ],
+      [
+        114.029432,
+        22.208602
+      ],
+      [
+        114.029662,
+        22.208606
+      ],
+      [
+        114.029788,
+        22.208619
+      ],
+      [
+        114.029898,
+        22.20865
+      ],
+      [
+        114.030154,
+        22.20871
+      ],
+      [
+        114.030223,
+        22.208727
+      ],
+      [
+        114.030513,
+        22.208835
+      ],
+      [
+        114.030722,
+        22.208909
+      ],
+      [
+        114.03082,
+        22.208911
+      ],
+      [
+        114.030936,
+        22.209004
+      ],
+      [
+        114.03094,
+        22.209
+      ],
+      [
+        114.031268,
+        22.20865
+      ],
+      [
+        114.031428,
+        22.208486
+      ],
+      [
+        114.031819,
+        22.208185
+      ],
+      [
+        114.032196,
+        22.207918
+      ],
+      [
+        114.032335,
+        22.207951
+      ],
+      [
+        114.032381,
+        22.207933
+      ],
+      [
+        114.032563,
+        22.207923
+      ],
+      [
+        114.032655,
+        22.207914
+      ],
+      [
+        114.032765,
+        22.207847
+      ],
+      [
+        114.03283,
+        22.207836
+      ],
+      [
+        114.032902,
+        22.207825
+      ],
+      [
+        114.033029,
+        22.207853
+      ],
+      [
+        114.03307,
+        22.207887
+      ],
+      [
+        114.033129,
+        22.207887
+      ],
+      [
+        114.033185,
+        22.207856
+      ],
+      [
+        114.033314,
+        22.207867
+      ],
+      [
+        114.033389,
+        22.207818
+      ],
+      [
+        114.03342,
+        22.207784
+      ],
+      [
+        114.033397,
+        22.20774
+      ],
+      [
+        114.033372,
+        22.207721
+      ],
+      [
+        114.033362,
+        22.207688
+      ],
+      [
+        114.03336,
+        22.207626
+      ],
+      [
+        114.033373,
+        22.207568
+      ],
+      [
+        114.033417,
+        22.207496
+      ],
+      [
+        114.033518,
+        22.207388
+      ],
+      [
+        114.033585,
+        22.207346
+      ],
+      [
+        114.03366,
+        22.207317
+      ],
+      [
+        114.033779,
+        22.207328
+      ],
+      [
+        114.033809,
+        22.207337
+      ],
+      [
+        114.033941,
+        22.207275
+      ],
+      [
+        114.03408,
+        22.207213
+      ],
+      [
+        114.034082,
+        22.207212
+      ],
+      [
+        114.034127,
+        22.207175
+      ],
+      [
+        114.034224,
+        22.207107
+      ],
+      [
+        114.034427,
+        22.207024
+      ],
+      [
+        114.034422,
+        22.206927
+      ],
+      [
+        114.034419,
+        22.206846
+      ],
+      [
+        114.034442,
+        22.206769
+      ],
+      [
+        114.034522,
+        22.206713
+      ],
+      [
+        114.034589,
+        22.206675
+      ],
+      [
+        114.034609,
+        22.206626
+      ],
+      [
+        114.034559,
+        22.206529
+      ],
+      [
+        114.034497,
+        22.206408
+      ],
+      [
+        114.034491,
+        22.206336
+      ],
+      [
+        114.034537,
+        22.206289
+      ],
+      [
+        114.034599,
+        22.206254
+      ],
+      [
+        114.034663,
+        22.206226
+      ],
+      [
+        114.034673,
+        22.206227
+      ],
+      [
+        114.03472,
+        22.206232
+      ],
+      [
+        114.034725,
+        22.206232
+      ],
+      [
+        114.034816,
+        22.206242
+      ],
+      [
+        114.034937,
+        22.206243
+      ],
+      [
+        114.03496,
+        22.206214
+      ],
+      [
+        114.035064,
+        22.205995
+      ],
+      [
+        114.035122,
+        22.205961
+      ],
+      [
+        114.035149,
+        22.205945
+      ],
+      [
+        114.03529,
+        22.205949
+      ],
+      [
+        114.035489,
+        22.205954
+      ],
+      [
+        114.035508,
+        22.205959
+      ],
+      [
+        114.035836,
+        22.20604
+      ],
+      [
+        114.035866,
+        22.206038
+      ],
+      [
+        114.036086,
+        22.206021
+      ],
+      [
+        114.036106,
+        22.206016
+      ],
+      [
+        114.036289,
+        22.205974
+      ],
+      [
+        114.036291,
+        22.205973
+      ],
+      [
+        114.03663,
+        22.205888
+      ],
+      [
+        114.036651,
+        22.205873
+      ],
+      [
+        114.036973,
+        22.205658
+      ],
+      [
+        114.03725,
+        22.205643
+      ],
+      [
+        114.037546,
+        22.206041
+      ],
+      [
+        114.037609,
+        22.206137
+      ],
+      [
+        114.037671,
+        22.206246
+      ],
+      [
+        114.037815,
+        22.206437
+      ],
+      [
+        114.037828,
+        22.206515
+      ],
+      [
+        114.037834,
+        22.206596
+      ],
+      [
+        114.037753,
+        22.206907
+      ],
+      [
+        114.037732,
+        22.206998
+      ],
+      [
+        114.037705,
+        22.207115
+      ],
+      [
+        114.037595,
+        22.207299
+      ],
+      [
+        114.03746,
+        22.20748
+      ]
+    ]
   }
 ];
 
@@ -268,7 +783,7 @@ function renderList() {
       <p class="route-theme">${route.theme}</p>
       <h2>${route.name}</h2>
       <p class="route-facts">${route.area} · ${route.duration} · ${route.stops.length} 站</p>
-      <p class="route-blurb">${route.blurb}</p>
+      <p class="route-blurb">${route.blurb}</p>${route.credit ? `<p class="route-credit">${route.credit}</p>` : ""}
     `;
     button.addEventListener("click", () => selectRoute(route.id));
     card.appendChild(button);
@@ -280,7 +795,9 @@ function renderList() {
       const stopButton = document.createElement("button");
       stopButton.type = "button";
       stopButton.className = "stop-btn" + (activeRoute && activeRoute.id === route.id && activeStop === index ? " active" : "");
-      stopButton.innerHTML = `<span class="stop-no" style="background:${route.color}">${index + 1}</span><span>${stop.name}</span>`;
+      const thumb = stop.photo ? `<img class="stop-thumb" src="${stop.photo.src}" alt="" loading="lazy" />` : "";
+      stopButton.className += stop.photo ? " has-photo" : "";
+      stopButton.innerHTML = `<span class="stop-no" style="background:${route.color}">${index + 1}</span><span class="stop-name">${stop.name}</span>${thumb}`;
       stopButton.addEventListener("click", () => selectRoute(route.id, index));
       item.appendChild(stopButton);
       list.appendChild(item);
@@ -291,7 +808,7 @@ function renderList() {
 
   const note = document.createElement("p");
   note.className = "fine";
-  note.textContent = "站點座標為約數，連線只表示步行順序，不是官方步道。船期、泳灘與古蹟通道請以現場及主管部門最新公布為準。";
+  note.textContent = "站點座標為約數。北社山海、東岸石徑、西灣尋洞的連線只表示步行順序；往聖方濟校園一線按開放街圖道路繪畫。兩者都不是官方步道軌跡。船期、泳灘與古蹟通道請以現場及主管部門最新公布為準。";
   routesEl.appendChild(note);
 }
 
@@ -333,15 +850,16 @@ function addMarkers(route) {
   route.stops.forEach((stop, index) => {
     const el = document.createElement("button");
     el.type = "button";
-    el.className = "pin" + (index === activeStop ? " active" : "");
+    el.className = "pin-wrap" + (index === activeStop ? " active" : "");
     el.style.setProperty("--pin", route.color);
-    el.innerHTML = `<span>${index + 1}</span>`;
+    // MapLibre 會改寫外層的 transform，所以旋轉只放在內層
+    el.innerHTML = `<span class="pin"><span>${index + 1}</span></span>`;
     el.setAttribute("aria-label", stop.name);
     el.addEventListener("click", (event) => {
       event.stopPropagation();
       focusStop(index);
     });
-    const marker = new maplibregl.Marker({ element: el, anchor: "bottom" })
+    const marker = new maplibregl.Marker({ element: el, anchor: "bottom", opacity: "1", opacityWhenCovered: "0.9" })
       .setLngLat([stop.lng, stop.lat])
       .addTo(map);
     markers.push(marker);
@@ -374,7 +892,33 @@ function openDetail(route, index) {
   document.getElementById("detail-kicker").textContent = `${route.name} · 第 ${index + 1} 站`;
   document.getElementById("detail-name").textContent = stop.name;
   document.getElementById("detail-text").textContent = stop.text;
-  document.getElementById("detail-meta").textContent = formatCoord(stop) + " · 只收錄已核對的公開記述";
+
+  const en = document.getElementById("detail-en");
+  en.hidden = !stop.en;
+  en.textContent = stop.en || "";
+
+  // 任何站點都可帶一張相片：photo: { src, alt, w, h, note }，credit 為出處
+  const figure = document.getElementById("detail-photo");
+  const img = document.getElementById("detail-img");
+  if (stop.photo) {
+    img.src = stop.photo.src;
+    img.alt = stop.photo.alt || stop.name;
+    if (stop.photo.w && stop.photo.h) {
+      img.width = stop.photo.w;
+      img.height = stop.photo.h;
+    }
+    const parts = [stop.photo.note, stop.credit || route.credit].filter(Boolean);
+    document.getElementById("detail-caption").textContent = parts.join(" · ");
+    figure.hidden = false;
+  } else {
+    img.removeAttribute("src");
+    figure.hidden = true;
+  }
+
+  const source = route.credit
+    ? (stop.approx ? "位置按路線圖估計，屬約數" : "座標取自開放街圖，屬約數") + " · 指示文字取自路線圖"
+    : "只收錄已核對的公開記述";
+  document.getElementById("detail-meta").textContent = formatCoord(stop) + " · " + source;
 }
 
 function focusStop(index) {

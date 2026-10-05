@@ -331,13 +331,24 @@ h1 {
   line-height: 26px;
 }
 
-.pin.active {
-  width: 36px;
+.pin-wrap {
+  display: block;
+  width: 30px;
   height: 36px;
-  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
-.pin.active span { line-height: 32px; font-size: 14px; }
+.pin {
+  display: block;
+  margin: 0 auto;
+}
+
+.pin-wrap.active { width: 36px; height: 42px; z-index: 2; }
+.pin-wrap.active .pin { width: 36px; height: 36px; }
+.pin-wrap.active .pin span { line-height: 32px; font-size: 14px; }
 
 .maplibregl-ctrl-attrib {
   background: rgba(18, 14, 11, 0.72) !important;
@@ -369,4 +380,56 @@ h1 {
   }
   .map-tools { display: none; }
   .vignette { background: linear-gradient(180deg, rgba(12,9,7,.45), transparent 22%, transparent 60%, rgba(12,9,7,.55)); }
+}
+
+/* 四條路線：未選取時只顯示標題與資料，選取後展開簡介與站點 */
+.route:not(.active) .route-blurb,
+.route:not(.active) .route-credit { display: none; }
+.route:not(.active) .route-main { padding-bottom: 12px; }
+.route h2 { font-size: 22px; }
+
+.route-credit {
+  margin: 8px 0 0;
+  color: #9fc6d6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.stop-btn.has-photo { grid-template-columns: 28px 1fr 52px; }
+.stop-name { min-width: 0; }
+.stop-thumb {
+  width: 52px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+#detail { max-height: calc(100vh - 44px); overflow: auto; }
+
+#detail-photo {
+  margin: 4px 0 12px;
+}
+#detail-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #2a221c;
+}
+#detail-photo figcaption {
+  margin-top: 6px;
+  color: #a89d90;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.en {
+  margin: 8px 0 0;
+  color: #b9afa3;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: var(--sans);
 }
