@@ -1,0 +1,182 @@
+rules_version = '2';
+
+// ===============================================================
+// 長洲立體步道：教師地圖製作器 Firestore 安全規則（原型，需定期覆核）
+// ===============================================================
+//
+// Assumed Data Model
+//
+// Collection: maps
+// Document ID: auto id
+// Fields:
+//   - title: string (required, 1–100)
+//   - description: string (required, 0–2000)
+//   - ownerUid: string (required, immutable, == creator's auth uid)
+//   - ownerEmail: string (required, == creator's verified token email, immutable)
+//       注意：公開地圖文件人人可讀，ownerEmail 亦會隨之可讀（學校電郵）；檢視頁不顯示。
+//   - ownerName: string (required, 0–100)
+//   - published: bool (required)
+//   - visibility: string (required, 'public' | 'school')
+//   - center: map {lng: number -180..180, lat: number -90..90} (required)
+//   - zoom: number (required, 3..20)
+//   - routes: list (required, <= 12 items)
+//       每項 {id, name, theme, area, duration, color, blurb, path?, stops:[{id,name,body,bodyEn?,lat,lng,photoId?,photoCredit?}]}
+//       規則語言不能逐項檢查清單內容；整份文件受 Firestore 1 MiB 上限約束，
+//       客戶端在顯示時一律以 textContent / 轉義處理，不把內容當 HTML。
+//   - createdAt: timestamp (required, == request.time on create, immutable)
+//   - updatedAt: timestamp (required, == request.time on every write)
+//
+// Subcollection: maps/{mapId}/photos
+// Document ID: auto id
+// Fields:
+//   - ownerUid: string (required, immutable, == parent map owner)
+//   - dataUrl: string (required, 'data:image/jpeg;base64,...', <= 950000 chars)
+//   - width: int (1..4096), height: int (1..4096)
+//   - createdAt: timestamp (== request.time on create, immutable)
+//   - updatedAt: timestamp (== request.time on every write)
+//
+// 存取原則
+//   - 只限 caritasfsc.edu.hk、電郵已驗證、經 Google 登入的帳戶可建立及管理地圖。
+//   - 地圖只有擁有人可修改或刪除；擁有欄位不可改。
+//   - 讀取：擁有人；或已發佈且 visibility == 'public'（任何人）；
+//     或已發佈且 visibility == 'school'（學校帳戶）。
+//   - 查詢（list）只容許擁有人查自己的地圖。
+//   - 相片跟隨所屬地圖的權限。
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helper Functions ----------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSchoolUser() {
+      return isAuthenticated()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('.*@caritasfsc[.]edu[.]hk$')
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+
+    function isOwner(userId) {
+      return isSchoolUser() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    function validString(v, minLen, maxLen) {
+      return v is string && v.size() >= minLen && v.size() <= maxLen;
+    }
+
+    function uidNotModified() {
+      return request.resource.data.ownerUid == resource.data.ownerUid;
+    }
+
+    function createdAtNotModified() {
+      return request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    // 地圖是否可讀（mapData 為地圖文件資料）
+    function canReadMap(mapData) {
+      return isOwner(mapData.ownerUid)
+        || (mapData.published == true && mapData.visibility == 'public')
+        || (mapData.published == true && mapData.visibility == 'school' && isSchoolUser());
+    }
+
+    // ---------- Domain Validators ----------
+    function isValidMap(d) {
+      return hasOnlyAllowedFields(d, ['title', 'description', 'ownerUid', 'ownerEmail', 'ownerName', 'published',
+                                      'visibility', 'center', 'zoom', 'routes', 'createdAt', 'updatedAt'])
+        && hasRequiredFields(d, ['title', 'description', 'ownerUid', 'ownerEmail', 'ownerName', 'published',
+                                 'visibility', 'center', 'zoom', 'routes', 'createdAt', 'updatedAt'])
+        && validString(d.title, 1, 100)
+        && validString(d.description, 0, 2000)
+        && validString(d.ownerUid, 1, 128)
+        && validString(d.ownerEmail, 3, 200)
+        && validString(d.ownerName, 0, 100)
+        && d.published is bool
+        && d.visibility in ['public', 'school']
+        && d.center is map
+        && d.center.keys().hasOnly(['lng', 'lat'])
+        && d.center.keys().hasAll(['lng', 'lat'])
+        && d.center.lng is number && d.center.lng >= -180 && d.center.lng <= 180
+        && d.center.lat is number && d.center.lat >= -90 && d.center.lat <= 90
+        && d.zoom is number && d.zoom >= 3 && d.zoom <= 20
+        && d.routes is list && d.routes.size() <= 12
+        && d.createdAt is timestamp
+        && d.updatedAt == request.time;
+    }
+
+    function isValidPhoto(d) {
+      return hasOnlyAllowedFields(d, ['ownerUid', 'dataUrl', 'width', 'height', 'createdAt', 'updatedAt'])
+        && hasRequiredFields(d, ['ownerUid', 'dataUrl', 'width', 'height', 'createdAt', 'updatedAt'])
+        && validString(d.ownerUid, 1, 128)
+        && d.dataUrl is string
+        && d.dataUrl.size() >= 100 && d.dataUrl.size() <= 950000
+        && d.dataUrl.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')
+        && d.width is int && d.width >= 1 && d.width <= 4096
+        && d.height is int && d.height >= 1 && d.height <= 4096
+        && d.createdAt is timestamp
+        && d.updatedAt == request.time;
+    }
+
+    // ---------- maps ----------
+    match /maps/{mapId} {
+      allow get: if canReadMap(resource.data);
+      allow list: if isOwner(resource.data.ownerUid);
+
+      allow create: if isSchoolUser()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerEmail == request.auth.token.email
+        && isValidMap(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if isOwner(resource.data.ownerUid)
+        && isValidMap(request.resource.data)
+        && uidNotModified()
+        && request.resource.data.ownerEmail == resource.data.ownerEmail
+        && createdAtNotModified();
+
+      allow delete: if isOwner(resource.data.ownerUid);
+
+      // ---------- maps/{mapId}/photos ----------
+      match /photos/{photoId} {
+        function parentMap() {
+          return get(/databases/$(database)/documents/maps/$(mapId)).data;
+        }
+
+        allow get: if canReadMap(parentMap());
+        allow list: if isOwner(parentMap().ownerUid);
+
+        allow create: if isSchoolUser()
+          && exists(/databases/$(database)/documents/maps/$(mapId))
+          && parentMap().ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == request.auth.uid
+          && isValidPhoto(request.resource.data)
+          && request.resource.data.createdAt == request.time;
+
+        allow update: if isOwner(resource.data.ownerUid)
+          && parentMap().ownerUid == request.auth.uid
+          && isValidPhoto(request.resource.data)
+          && uidNotModified()
+          && createdAtNotModified();
+
+        // 刪除地圖時先刪相片；相片擁有人必定是地圖擁有人
+        allow delete: if isOwner(resource.data.ownerUid);
+      }
+    }
+
+    // 其他路徑一律拒絕
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

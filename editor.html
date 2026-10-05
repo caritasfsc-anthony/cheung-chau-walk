@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hant" class="adm">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>編輯地圖 · 長洲立體步道</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body class="adm ed">
+  <header class="adm-top ed-top">
+    <a class="adm-back" href="admin.html">← 老師後台</a>
+    <h1 class="adm-title">編輯地圖</h1>
+    <span class="ed-dirty" id="dirtyState" aria-live="polite"></span>
+    <div class="adm-row ed-top-actions">
+      <a class="adm-btn adm-btn-ghost" id="previewLink" href="index.html" target="_blank" rel="noopener" hidden>預覽</a>
+      <button type="button" class="adm-btn adm-btn-primary" id="saveBtn" disabled>儲存</button>
+      <button type="button" class="adm-btn adm-btn-ghost" id="signOutBtn" hidden>登出</button>
+    </div>
+  </header>
+
+  <p class="adm-status ed-status" id="status" role="status" aria-live="polite"></p>
+
+  <section class="adm-card adm-signin" id="signInCard" hidden>
+    <h2>以學校帳戶登入</h2>
+    <p>編輯地圖只限 <strong>@caritasfsc.edu.hk</strong> 學校 Google 帳戶使用。</p>
+    <button type="button" class="adm-btn adm-btn-primary" id="signInBtn">以 Google 帳戶登入</button>
+    <p class="adm-error" id="authError" role="alert"></p>
+  </section>
+
+  <section class="adm-card adm-signin" id="blockedCard" hidden>
+    <h2>未能編輯此地圖</h2>
+    <p id="blockedMsg"></p>
+    <a class="adm-btn adm-btn-primary" href="admin.html">返回老師後台</a>
+  </section>
+
+  <div class="ed-layout" id="editorArea" hidden>
+    <aside class="ed-panel" id="panel">
+      <section class="ed-sec">
+        <label class="adm-field"><span>地圖標題</span><input type="text" id="mapTitle" maxlength="100" /></label>
+        <label class="adm-field"><span>簡介</span><textarea id="mapDesc" class="ed-ta" maxlength="2000" rows="3"></textarea></label>
+        <div class="adm-row">
+          <button type="button" class="adm-btn adm-btn-ghost" id="setCenterBtn">設為地圖中心</button>
+          <span class="ed-hint" id="centerInfo"></span>
+        </div>
+      </section>
+
+      <section class="ed-sec">
+        <div class="ed-sec-head"><h2>路線</h2><button type="button" class="adm-btn adm-btn-ghost" id="addRouteBtn">＋ 新增路線</button></div>
+        <ol class="ed-list" id="routeList"></ol>
+        <div id="routeForm" hidden>
+          <label class="adm-field"><span>路線名稱</span><input type="text" id="rName" maxlength="60" /></label>
+          <div class="ed-grid">
+            <label class="adm-field"><span>主題</span><input type="text" id="rTheme" maxlength="120" /></label>
+            <label class="adm-field"><span>地區</span><input type="text" id="rArea" maxlength="120" /></label>
+            <label class="adm-field"><span>所需時間</span><input type="text" id="rDuration" maxlength="120" /></label>
+            <label class="adm-field"><span>顏色</span><input type="color" id="rColor" class="ed-color" /></label>
+          </div>
+          <label class="adm-field"><span>簡介</span><textarea id="rBlurb" class="ed-ta" maxlength="600" rows="3"></textarea></label>
+          <label class="ed-check" id="rPathWrap" hidden><input type="checkbox" id="rUsePath" /> 使用道路路徑</label>
+          <div class="adm-row ed-route-actions">
+            <button type="button" class="adm-btn adm-btn-ghost" id="routeUpBtn">上移</button>
+            <button type="button" class="adm-btn adm-btn-ghost" id="routeDownBtn">下移</button>
+            <button type="button" class="adm-btn adm-btn-ghost adm-btn-danger" id="routeDelBtn">刪除路線</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ed-sec" id="stopSec" hidden>
+        <div class="ed-sec-head"><h2>站點</h2><button type="button" class="adm-btn adm-btn-ghost" id="addStopBtn">＋ 新增站點</button></div>
+        <ol class="ed-list" id="stopList"></ol>
+        <div id="stopForm" hidden>
+          <label class="adm-field"><span>站點名稱</span><input type="text" id="sName" maxlength="80" /></label>
+          <label class="adm-field"><span>介紹</span><textarea id="sBody" class="ed-ta" maxlength="3000" rows="5"></textarea></label>
+          <label class="adm-field"><span>英文介紹（選填）</span><textarea id="sBodyEn" class="ed-ta" maxlength="3000" rows="3"></textarea></label>
+          <div class="adm-row">
+            <button type="button" class="adm-btn adm-btn-ghost" id="placeBtn">在地圖上點選位置</button>
+            <span class="ed-hint" id="stopCoords"></span>
+          </div>
+          <div class="ed-photo">
+            <div class="ed-thumb" id="photoThumb"></div>
+            <div class="adm-row">
+              <label class="adm-btn adm-btn-ghost ed-file"><span id="photoBtnLabel">上載相片</span><input type="file" id="photoInput" accept="image/*" /></label>
+              <button type="button" class="adm-btn adm-btn-ghost adm-btn-danger" id="photoRemoveBtn">移除</button>
+            </div>
+            <p class="ed-hint" id="photoProgress" aria-live="polite"></p>
+          </div>
+          <label class="adm-field"><span>相片來源 / 鳴謝</span><input type="text" id="sCredit" maxlength="200" /></label>
+          <div class="adm-row">
+            <button type="button" class="adm-btn adm-btn-ghost" id="stopUpBtn">上移</button>
+            <button type="button" class="adm-btn adm-btn-ghost" id="stopDownBtn">下移</button>
+            <button type="button" class="adm-btn adm-btn-ghost adm-btn-danger" id="stopDelBtn">刪除站點</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+    <div class="ed-mapwrap">
+      <div class="ed-map" id="map"></div>
+      <p class="ed-map-msg" id="mapMsg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+  <script type="module" src="editor.js"></script>
+</body>
+</html>

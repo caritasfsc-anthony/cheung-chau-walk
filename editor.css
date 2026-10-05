@@ -1,0 +1,57 @@
+/* 長洲立體步道：編輯地圖（沿用 admin.css 的 .adm- 樣式） */
+.ed-top .adm-title { font-size: 20px; }
+.ed-top-actions { margin-left: auto; }
+.ed-dirty { font-size: 13px; color: var(--muted); }
+.ed-dirty.is-dirty { color: var(--gold); }
+.ed-status { padding: 8px clamp(16px, 4vw, 40px) 0; margin: 0; }
+.ed-status:empty { display: none; }
+
+.ed-layout { display: grid; grid-template-columns: 420px 1fr; height: calc(100vh - 74px); height: calc(100dvh - 74px); }
+.ed-panel { overflow-y: auto; padding: 16px; border-right: 1px solid var(--line); background: var(--ink-2); }
+.ed-mapwrap { position: relative; min-height: 0; }
+.ed-map { position: absolute; inset: 0; }
+.ed-map-msg { position: absolute; left: 12px; top: 12px; margin: 0; max-width: 80%; font-size: 13px;
+  background: rgba(0, 0, 0, 0.65); color: var(--gold); padding: 6px 10px; border-radius: 8px; pointer-events: none; }
+.ed-map-msg:empty { display: none; }
+.ed-mapwrap.is-armed .ed-map canvas { cursor: crosshair; }
+
+.ed-sec { padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.ed-sec:last-child { border-bottom: 0; }
+.ed-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.ed-sec-head h2 { margin: 0 !important; font-family: var(--serif); font-size: 18px; }
+.ed-hint { color: var(--muted); font-size: 13px; margin: 0; }
+.ed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.ed-ta { font: inherit; font-size: 16px; color: var(--paper); background: var(--ink); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; resize: vertical; width: 100%; box-sizing: border-box; }
+.ed-ta:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.adm-field input.ed-color { padding: 4px; height: 44px; width: 100%; box-sizing: border-box; cursor: pointer; }
+.ed-check { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 0 0 12px; cursor: pointer; }
+.ed-check input { width: 18px; height: 18px; }
+
+.ed-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+.ed-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font: inherit; font-size: 14px;
+  color: var(--paper); background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+.ed-item:hover { border-color: var(--gold); }
+.ed-item.is-sel { border-color: var(--gold); background: rgba(226, 192, 137, 0.12); }
+.ed-swatch { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+.ed-num { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; color: #fff; background: var(--cinnabar); }
+.ed-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ed-item-sub { margin-left: auto; color: var(--muted); font-size: 12px; flex: none; }
+
+.ed-photo { margin: 12px 0; display: grid; gap: 8px; }
+.ed-thumb { width: 100%; max-width: 260px; aspect-ratio: 4 / 3; border-radius: 10px; border: 1px dashed var(--line);
+  background: var(--ink) center / cover no-repeat; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.ed-file { position: relative; overflow: hidden; }
+.ed-file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.ed-marker { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; cursor: grab;
+  font: 700 13px var(--sans); color: #fff; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); }
+.ed-marker.is-sel { width: 34px; height: 34px; outline: 3px solid var(--gold); }
+
+@media (max-width: 860px) {
+  .ed-layout { display: flex; flex-direction: column-reverse; height: auto; }
+  .ed-mapwrap { height: 40vh; }
+  .ed-panel { overflow: visible; border-right: 0; }
+  .ed-grid { grid-template-columns: 1fr; }
+}

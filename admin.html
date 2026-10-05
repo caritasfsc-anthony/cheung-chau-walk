@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant" class="adm">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>老師後台 · 長洲立體步道</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="adm">
+  <header class="adm-top">
+    <a class="adm-back" href="index.html">← 長洲立體步道</a>
+    <h1 class="adm-title">老師後台</h1>
+    <div class="adm-user" id="userBox" hidden>
+      <span class="adm-user-name" id="userName"></span>
+      <span class="adm-user-email" id="userEmail"></span>
+      <button type="button" class="adm-btn adm-btn-ghost" id="signOutBtn">登出</button>
+    </div>
+  </header>
+
+  <main class="adm-main">
+    <p class="adm-status" id="status" role="status" aria-live="polite"></p>
+
+    <section class="adm-card adm-signin" id="signInCard" hidden>
+      <h2>以學校帳戶登入</h2>
+      <p>老師後台只限 <strong>@caritasfsc.edu.hk</strong> 學校 Google 帳戶使用。登入後可建立、編輯及發佈自己的步行地圖。</p>
+      <button type="button" class="adm-btn adm-btn-primary" id="signInBtn">以 Google 帳戶登入</button>
+      <p class="adm-error" id="authError" role="alert"></p>
+    </section>
+
+    <div id="app-area" hidden>
+      <section class="adm-card adm-new">
+        <h2>新增地圖</h2>
+        <label class="adm-field">
+          <span>地圖標題</span>
+          <input type="text" id="newTitle" maxlength="100" placeholder="例如：中三級長洲考察" />
+        </label>
+        <div class="adm-row">
+          <button type="button" class="adm-btn adm-btn-primary" id="newBlankBtn">空白地圖</button>
+          <button type="button" class="adm-btn" id="newTemplateBtn">由長洲範本複製</button>
+        </div>
+        <p class="adm-progress" id="newProgress" aria-live="polite"></p>
+      </section>
+
+      <section class="adm-section">
+        <h2>我的地圖</h2>
+        <div class="adm-list" id="mapList"></div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

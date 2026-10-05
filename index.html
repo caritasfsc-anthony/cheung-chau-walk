@@ -20,9 +20,10 @@
     <div id="stack" data-sheet="collapsed" data-view="list">
       <button id="sheet-handle" class="sheet-handle" type="button" aria-label="展開或收起路線面板" aria-expanded="false"><span></span></button>
       <header id="mast" class="panel">
-        <p class="eyebrow"><span class="seal">洲</span>離島步行 · 不是導航</p>
-        <h1>長洲立體步道</h1>
-        <p class="lede">把啞鈴島的廟宇、石灘與西岸岩洞，收進一張可俯瞰的立體地圖。選一條路線，沿站點慢慢看。</p>
+        <a class="admin-link" href="admin.html">老師登入</a>
+        <p class="eyebrow"><span id="mast-seal" class="seal">洲</span><span id="mast-eyebrow">離島步行 · 不是導航</span></p>
+        <h1 id="mast-title">長洲立體步道</h1>
+        <p id="mast-lede" class="lede">把啞鈴島的廟宇、石灘與西岸岩洞，收進一張可俯瞰的立體地圖。選一條路線，沿站點慢慢看。</p>
         <p id="mast-route" class="mast-route"></p>
       </header>
       <div id="sheet-body">
@@ -53,8 +54,18 @@
     </div>
 
     <p id="status" class="status" hidden></p>
+
+    <div id="gate" class="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
+      <div class="gate-card panel">
+        <h2 id="gate-title"></h2>
+        <p id="gate-text"></p>
+        <p id="gate-error" class="gate-error" hidden role="alert"></p>
+        <button id="gate-signin" type="button" hidden>以學校 Google 帳戶登入</button>
+        <p class="gate-back"><a href="./">返回長洲步道</a></p>
+      </div>
+    </div>
   </div>
   <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

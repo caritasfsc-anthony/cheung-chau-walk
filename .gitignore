@@ -1,3 +1,12 @@
 __pycache__/
 *.pyc
 screenshots/
+node_modules/
+
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.log
+node_modules/
+tests/node_modules/
+screenshots/
