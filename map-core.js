@@ -1,11 +1,51 @@
 /* 長洲立體步道：地圖底層（樣式、地形、本機代理偵測），檢視頁與編輯器共用 */
 
 export const DIRECT_TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+const LANDSD = "https://mapapi.geodata.gov.hk/gs/api/v1.0.0/xyz";
+const LANDSD_ATTR = '<a href="https://api.portal.hkmapservice.gov.hk/disclaimer" target="_blank" rel="noopener">© 地政總署 Map information from Lands Department</a>';
+const OFM_GLYPHS = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf";
+const OFM_VECTOR = "https://tiles.openfreemap.org/planet";
+
+/* 地政總署底圖（WGS84 XYZ PNG）：kind = "map"（地形圖）或 "imagery"（航照）；另疊中文標籤與 OpenFreeMap 立體建築 */
+export function landsdStyle(kind, proxied) {
+  const u = (url) => (proxied ? toProxy(url) : url);
+  const raster = (path, minzoom) => ({
+    type: "raster", tiles: [u(LANDSD + "/" + path + "/WGS84/{z}/{x}/{y}.png")],
+    tileSize: 256, minzoom, maxzoom: 20, attribution: LANDSD_ATTR
+  });
+  return {
+    version: 8,
+    glyphs: u(OFM_GLYPHS),
+    sources: {
+      "landsd-basemap": raster(kind === "imagery" ? "imagery" : "basemap", kind === "imagery" ? 0 : 10),
+      "landsd-label": raster("label/hk/tc", 10),
+      openmaptiles: { type: "vector", url: u(OFM_VECTOR) }
+    },
+    layers: [
+      { id: "background", type: "background", paint: { "background-color": kind === "imagery" ? "#1d2420" : "#eef0ea" } },
+      { id: "landsd-basemap", type: "raster", source: "landsd-basemap" },
+      {
+        id: "building-3d", type: "fill-extrusion", source: "openmaptiles", "source-layer": "building", minzoom: 15,
+        paint: {
+          "fill-extrusion-color": "#d8d2c8",
+          "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
+          "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+          "fill-extrusion-opacity": kind === "imagery" ? 0.45 : 0.6
+        }
+      },
+      { id: "landsd-label", type: "raster", source: "landsd-label" }
+    ]
+  };
+}
+
+/* kind：map / imagery / osm（供切換鈕使用）；style 可為網址或樣式物件 */
 export const DIRECT_STYLES = [
-  { url: "https://tiles.openfreemap.org/styles/liberty", label: "OpenFreeMap Liberty", proxied: false },
-  { url: "https://tiles.openfreemap.org/styles/dark", label: "OpenFreeMap Dark", proxied: false }
+  { kind: "map", style: () => landsdStyle("map", false), label: "地政總署地形圖", minZoom: 10, proxied: false },
+  { kind: "imagery", style: () => landsdStyle("imagery", false), label: "地政總署航照", minZoom: 10, proxied: false },
+  { kind: "osm", style: () => "https://tiles.openfreemap.org/styles/liberty", label: "OpenFreeMap Liberty", proxied: false },
+  { kind: "osm", style: () => "https://tiles.openfreemap.org/styles/dark", label: "OpenFreeMap Dark", proxied: false }
 ];
-const PROXY_HOSTS = ["tiles.openfreemap.org", "s3.amazonaws.com"];
+const PROXY_HOSTS = ["tiles.openfreemap.org", "s3.amazonaws.com", "mapapi.geodata.gov.hk"];
 const STYLE_TIMEOUT_MS = 12000;
 
 /* 由 serve.py 提供時改用 /proxy/<host>/<path>；直接開檔或其他伺服器（GitHub Pages 等）則用原網址。 */
@@ -46,11 +86,14 @@ export function detectProxy() {
       tiles.proxyMode = ok;
       if (ok) {
         // 先走本機代理，最後才嘗試直連。
-        tiles.styles = DIRECT_STYLES.map((s) => ({ url: toProxy(s.url), label: s.label + "（本機代理）", proxied: true }))
-          .concat(DIRECT_STYLES);
+        tiles.styles = DIRECT_STYLES.map((s) => ({
+          ...s,
+          style: s.kind === "osm" ? () => toProxy(s.style()) : () => landsdStyle(s.kind, true),
+          label: s.label + "（本機代理）", proxied: true
+        })).concat(DIRECT_STYLES);
         tiles.terrain = toProxy(DIRECT_TERRAIN);
       }
-      window.__ccw = { proxyMode: ok, styles: tiles.styles.map((s) => s.url), terrain: tiles.terrain };
+      window.__ccw = { proxyMode: ok, styles: tiles.styles.map((s) => s.label), terrain: tiles.terrain };
       return ok;
     });
   }
@@ -65,15 +108,20 @@ export function createMap(opts) {
     const entry = tiles.styles[index];
     let ready = false;
     let failed = false;
+    const holder = { entry };
     const map = new maplibregl.Map({
       container: opts.container,
-      style: entry.url,
+      style: entry.style(),
       attributionControl: false,
       localIdeographFontFamily: "'Noto Sans TC', 'PingFang TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif",
       // 代理模式下的保險：即使樣式內有漏改的網址，也轉到本機代理。
-      transformRequest: entry.proxied ? (url) => ({ url: toProxy(url) }) : undefined,
+      transformRequest: (url) => ({ url: holder.entry.proxied ? toProxy(url) : url }),
       ...opts.mapOptions()
     });
+    map.__ccwHolder = holder;
+    map.__ccwBaseMin = map.getMinZoom();
+    if (entry.minZoom && map.getMinZoom() < entry.minZoom) map.setMinZoom(entry.minZoom);
+    if (window.__ccw) window.__ccw.map = map;
     if (opts.onCreate) opts.onCreate(map, entry);
     const failOver = (reason) => {
       if (ready || failed) return;
@@ -104,6 +152,24 @@ export function createMap(opts) {
     });
   };
   boot();
+}
+
+/* 切換底圖（map / imagery / osm）；完成後呼叫 onReady(map, entry) 以重新加上地形、路線等 */
+export function currentKind(map) {
+  return map && map.__ccwHolder ? map.__ccwHolder.entry.kind : null;
+}
+
+export function switchStyle(map, kind, onReady) {
+  const holder = map.__ccwHolder;
+  const current = holder.entry;
+  const entry = tiles.styles.find((s) => s.kind === kind && s.proxied === !!current.proxied)
+    || tiles.styles.find((s) => s.kind === kind);
+  if (!entry) return null;
+  holder.entry = entry;
+  map.setMinZoom(Math.max(map.__ccwBaseMin || 0, entry.minZoom || 0));
+  map.once("style.load", () => onReady && onReady(map, entry));
+  map.setStyle(entry.style(), { diff: false });
+  return entry;
 }
 
 /* 加入地形與天空；成功回傳 true */

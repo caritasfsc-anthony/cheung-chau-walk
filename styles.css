@@ -289,6 +289,24 @@ h1 {
 
 #reset-view:hover { border-color: var(--gold); }
 
+#style-switch {
+  display: inline-flex;
+  background: rgba(18, 14, 11, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#style-switch button {
+  background: transparent;
+  color: var(--paper);
+  border: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+#style-switch button[aria-pressed="true"] { background: var(--gold); color: #1a120e; }
+
 #map-note {
   margin: 0;
   color: #d9d0c4;
@@ -612,8 +630,12 @@ h1 {
     left: calc(10px + env(safe-area-inset-left, 0px));
     top: calc(10px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
+  #style-switch { order: 2; }
+  #style-switch button { min-height: 36px; font-size: 14px; }
   #reset-view {
     min-height: 44px;
     padding: 0 16px;

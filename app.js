@@ -6,7 +6,7 @@
 import { BUILTIN_SITE } from "./routes-data.js";
 import {
   tiles, detectProxy, createMap, enableTerrain as addTerrain, routeCoords, setRouteLine,
-  clearRouteLine, esc, safeColor
+  clearRouteLine, esc, safeColor, switchStyle, currentKind
 } from "./map-core.js";
 
 const routesEl = document.getElementById("routes");
@@ -507,6 +507,7 @@ function startMap() {
         ? "已開啟地形與傾斜鏡頭；建築立體見於較大比例"
         : "地形圖磚未能載入，仍以傾斜鏡頭觀看";
       if (tiles.proxyMode && entry.proxied) note.textContent += " · 經本機代理載入圖磚";
+      syncStyleSwitch();
       if (ROUTES.length) selectRoute(ROUTES[0].id);
     }
   });
@@ -526,6 +527,23 @@ closeBtn.addEventListener("click", () => {
 });
 
 document.getElementById("reset-view").addEventListener("click", goHome);
+
+/* 底圖切換：地圖 / 航照 / OSM；換樣式後重加地形與路線（標記為 DOM，不受影響） */
+function syncStyleSwitch() {
+  const kind = currentKind(map);
+  document.querySelectorAll("#style-switch button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
+}
+document.querySelectorAll("#style-switch button").forEach((btn) => btn.addEventListener("click", () => {
+  if (!map || !styleReady || currentKind(map) === btn.dataset.kind) return;
+  styleReady = false;
+  switchStyle(map, btn.dataset.kind, (m) => {
+    styleReady = true;
+    addTerrain(m, isMobile() ? 1.45 : 1.85);
+    if (activeRoute) setRouteLine(m, routeCoords(activeRoute), safeColor(activeRoute.color));
+    syncStyleSwitch();
+  });
+  syncStyleSwitch();
+}));
 window.addEventListener("resize", () => {
   if (map) map.resize();
   if (isMobile()) setSheet(sheetState, { recenter: false });
