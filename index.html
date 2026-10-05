@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>長洲立體步道</title>
+  <meta name="description" content="以傾斜立體地圖閱讀長洲的廟宇、海岸與西灣步道。座標為約數，並非官方路線。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="map" role="application" aria-label="長洲立體地圖"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div id="stack">
+      <header id="mast" class="panel">
+        <p class="eyebrow"><span class="seal">洲</span>離島步行 · 不是導航</p>
+        <h1>長洲立體步道</h1>
+        <p class="lede">把啞鈴島的廟宇、石灘與西岸岩洞，收進一張可俯瞰的立體地圖。選一條路線，沿站點慢慢看。</p>
+      </header>
+      <section id="routes" class="panel" aria-label="步行路線"></section>
+    </div>
+
+    <aside id="detail" class="panel" hidden aria-live="polite">
+      <div class="detail-top">
+        <p id="detail-kicker" class="kicker"></p>
+        <button id="detail-close" type="button">關閉</button>
+      </div>
+      <h2 id="detail-name"></h2>
+      <p id="detail-text"></p>
+      <p id="detail-meta" class="meta"></p>
+    </aside>
+
+    <div class="map-tools">
+      <button id="reset-view" type="button">回到全島</button>
+      <p id="map-note">傾斜視角 · 地形與建築為圖磚所能提供的範圍</p>
+    </div>
+
+    <p id="status" class="status" hidden></p>
+  </div>
+  <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
