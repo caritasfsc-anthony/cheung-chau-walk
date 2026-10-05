@@ -711,9 +711,9 @@ h1 {
 /* 現正查看的站：橙色並加白邊 */
 .pin-wrap.active .pin { background: #ff8a1f; box-shadow: 0 0 0 3px #fff, 0 0 16px rgba(255,138,31,0.85); }
 /* 我的位置按鈕與藍點 */
-#locate-me[aria-pressed="true"] { background: #2b7de9; color: #fff; }
+#locate-me[aria-pressed="true"] { background: #ff8a1f; color: #1a120e; }
 .me-dot {
   width: 18px; height: 18px; border-radius: 50%;
-  background: #2b7de9; border: 3px solid #fff;
-  box-shadow: 0 0 0 6px rgba(43,125,233,0.25), 0 1px 4px rgba(0,0,0,0.4);
+  background: #ff8a1f; border: 3px solid #fff;
+  box-shadow: 0 0 0 6px rgba(255,138,31,0.3), 0 1px 4px rgba(0,0,0,0.4);
 }

@@ -531,7 +531,7 @@ closeBtn.addEventListener("click", () => {
 
 document.getElementById("reset-view").addEventListener("click", goHome);
 
-/* 我的位置：可開可關，用藍點顯示，首次定位時把鏡頭移過去 */
+/* 我的位置：可開可關，用橙點顯示，首次定位時把鏡頭移過去 */
 const locateBtn = document.getElementById("locate-me");
 let geoWatch = null;
 let meMarker = null;
