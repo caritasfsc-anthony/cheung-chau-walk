@@ -139,7 +139,7 @@ export async function createMapDoc(mapId, user, fields) {
 
 /* 只更新可編輯欄位；擁有人、建立時間等由規則鎖定 */
 export async function saveMapDoc(mapId, fields) {
-  const allowed = ["title", "description", "published", "visibility", "center", "zoom", "routes"];
+  const allowed = ["title", "description", "marquee", "published", "visibility", "center", "zoom", "routes"];
   const data = { updatedAt: serverTimestamp() };
   for (const k of allowed) if (k in fields) data[k] = fields[k];
   await updateDoc(doc(db, "maps", mapId), data);
@@ -208,9 +208,12 @@ export function pathFromFirestore(path) {
 }
 
 /* Firestore 地圖 → 顯示程式用的 site 物件（與內置路線同一格式） */
+export const DEFAULT_MARQUEE = "溫馨提示：地圖上的公廁及食店資料只供參考，請以現場實際情況為準。";
+
 export function toSite(mapDoc, photos) {
   const title = mapDoc.title || "未命名地圖";
   return {
+    marquee: typeof mapDoc.marquee === "string" ? mapDoc.marquee : DEFAULT_MARQUEE,
     builtin: false,
     id: mapDoc.id,
     title,

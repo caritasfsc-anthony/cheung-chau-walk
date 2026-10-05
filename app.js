@@ -69,6 +69,11 @@ function renderMast() {
   lede.hidden = !site.lede;
   if (!site.builtin) document.title = site.title;
   document.getElementById("map").setAttribute("aria-label", site.title + " 立體地圖");
+  const mq = document.getElementById("marquee");
+  const mqText = String(site.marquee || "").trim();
+  mq.hidden = !mqText;
+  document.getElementById("marquee-text").textContent = mqText;
+  mq.style.setProperty("--mq-dur", Math.max(12, mqText.length * 0.45) + "s");
 }
 
 function renderList() {

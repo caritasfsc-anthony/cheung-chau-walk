@@ -94,11 +94,12 @@ service cloud.firestore {
     // ---------- Domain Validators ----------
     function isValidMap(d) {
       return hasOnlyAllowedFields(d, ['title', 'description', 'ownerUid', 'ownerEmail', 'ownerName', 'published',
-                                      'visibility', 'center', 'zoom', 'routes', 'createdAt', 'updatedAt'])
+                                      'visibility', 'center', 'zoom', 'routes', 'createdAt', 'updatedAt', 'marquee'])
         && hasRequiredFields(d, ['title', 'description', 'ownerUid', 'ownerEmail', 'ownerName', 'published',
                                  'visibility', 'center', 'zoom', 'routes', 'createdAt', 'updatedAt'])
         && validString(d.title, 1, 100)
         && validString(d.description, 0, 2000)
+        && (!('marquee' in d) || validString(d.marquee, 0, 200))
         && validString(d.ownerUid, 1, 128)
         && validString(d.ownerEmail, 3, 200)
         && validString(d.ownerName, 0, 100)

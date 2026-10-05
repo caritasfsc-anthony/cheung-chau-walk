@@ -2,7 +2,7 @@
 import {
   watchAuth, signInSchool, signOutUser, friendlyDbError, LIMITS,
   getMap, saveMapDoc, loadPhotos, photoIdsOf, putPhoto, newPhotoId, deletePhoto, newId,
-  pathFromFirestore
+  pathFromFirestore, DEFAULT_MARQUEE
 } from "./firebase-client.js";
 import { detectProxy, createMap, setRouteLine, clearRouteLine, esc, safeColor } from "./map-core.js";
 import { compressImage } from "./photo-utils.js";
@@ -10,7 +10,7 @@ import { compressImage } from "./photo-utils.js";
 const $ = (id) => document.getElementById(id);
 const els = {};
 ["status", "signInCard", "signInBtn", "authError", "signOutBtn", "blockedCard", "blockedMsg", "editorArea",
-  "previewLink", "saveBtn", "dirtyState", "mapTitle", "mapDesc", "setCenterBtn", "centerInfo",
+  "previewLink", "saveBtn", "dirtyState", "mapTitle", "mapDesc", "mapMarquee", "setCenterBtn", "centerInfo",
   "addRouteBtn", "routeList", "routeForm", "rName", "rTheme", "rArea", "rDuration", "rColor", "rBlurb",
   "rPathWrap", "rUsePath", "routeUpBtn", "routeDownBtn", "routeDelBtn",
   "stopSec", "addStopBtn", "stopList", "stopForm", "sName", "sBody", "sBodyEn", "placeBtn", "stopCoords",
@@ -97,6 +97,7 @@ watchAuth(async (user, message) => {
   els.previewLink.hidden = false;
   els.mapTitle.value = doc.title || "";
   els.mapDesc.value = doc.description || "";
+  els.mapMarquee.value = typeof doc.marquee === "string" ? doc.marquee : DEFAULT_MARQUEE;
   showCenterInfo();
   showOnly("editor");
   setStatus("");
@@ -310,6 +311,7 @@ bindText(els.sBodyEn, curStop, "bodyEn");
 bindText(els.sCredit, curStop, "photoCredit");
 els.mapTitle.addEventListener("input", () => setDirty(true));
 els.mapDesc.addEventListener("input", () => setDirty(true));
+els.mapMarquee.addEventListener("input", () => setDirty(true));
 
 els.rUsePath.addEventListener("change", () => {
   const r = curRoute();
@@ -490,6 +492,7 @@ async function save() {
   if (!state.loaded || state.saving) return;
   const title = clean(els.mapTitle.value);
   const description = clean(els.mapDesc.value);
+  const marquee = clean(els.mapMarquee.value).slice(0, 200);
   const { routes, errs } = buildRoutes();
   if (!title) errs.unshift("地圖標題不可留空");
   if (title.length > LIMITS.title) errs.unshift(`地圖標題超過 ${LIMITS.title} 字`);
@@ -504,9 +507,10 @@ async function save() {
   setStatus("");
   const center = state.doc.center, zoom = state.doc.zoom;
   try {
-    await saveMapDoc(mapId, { title, description, center, zoom, routes });
+    await saveMapDoc(mapId, { title, description, marquee, center, zoom, routes });
     state.doc.title = title;
     state.doc.description = description;
+    state.doc.marquee = marquee;
     // 路徑取消勾選後已在儲存時移除
     state.routes.forEach((r) => { if (!state.usePath.get(r.id)) delete r.path; });
     setDirty(false);

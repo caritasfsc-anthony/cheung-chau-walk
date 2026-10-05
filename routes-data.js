@@ -719,6 +719,7 @@ export const FINE_NOTE = "站點座標為約數。北社山海、東岸石徑、
 
 /* 內置版本的刊頭與設定（與 Firestore 地圖共用同一個顯示程式） */
 export const BUILTIN_SITE = {
+  marquee: "溫馨提示：地圖上的公廁及食店資料只供參考，請以現場實際情況為準。",
   builtin: true,
   title: "長洲立體步道",
   seal: "洲",
