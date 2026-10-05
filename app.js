@@ -5,6 +5,7 @@
 
 import { BUILTIN_SITE } from "./routes-data.js";
 import { initFerry } from "./ferry.js";
+import { initServices, applyServices } from "./poi.js";
 import {
   tiles, detectProxy, createMap, enableTerrain as addTerrain, routeCoords, setRouteLine,
   clearRouteLine, esc, safeColor, switchStyle, currentKind
@@ -512,6 +513,7 @@ function startMap() {
         : "地形圖磚未能載入，仍以傾斜鏡頭觀看";
       if (tiles.proxyMode && entry.proxied) note.textContent += " · 經本機代理載入圖磚";
       syncStyleSwitch();
+      applyServices(m);
       if (ROUTES.length) selectRoute(ROUTES[0].id);
     }
   });
@@ -583,6 +585,7 @@ document.querySelectorAll("#style-switch button").forEach((btn) => btn.addEventL
     styleReady = true;
     addTerrain(m, isMobile() ? 1.45 : 1.85);
     if (activeRoute) setRouteLine(m, routeCoords(activeRoute), safeColor(activeRoute.color));
+    applyServices(m);
     syncStyleSwitch();
   });
   syncStyleSwitch();
@@ -700,3 +703,4 @@ document.getElementById("detail-next").addEventListener("click", () => {
 });
 
 initFerry({ getMap: () => map, button: document.getElementById("ferry-toggle"), panel: document.getElementById("ferry-panel") });
+initServices({ getMap: () => map, buttons: { toilets: document.getElementById("svc-toilets"), food: document.getElementById("svc-food") } });
