@@ -2,7 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#14110e" />
   <title>長洲立體步道</title>
   <meta name="description" content="以傾斜立體地圖閱讀長洲的廟宇、海岸與西灣步道。座標為約數，並非官方路線。" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,13 +17,19 @@
     <div id="map" role="application" aria-label="長洲立體地圖"></div>
     <div class="vignette" aria-hidden="true"></div>
 
-    <div id="stack">
+    <div id="stack" data-sheet="collapsed" data-view="list">
+      <button id="sheet-handle" class="sheet-handle" type="button" aria-label="展開或收起路線面板" aria-expanded="false"><span></span></button>
       <header id="mast" class="panel">
         <p class="eyebrow"><span class="seal">洲</span>離島步行 · 不是導航</p>
         <h1>長洲立體步道</h1>
         <p class="lede">把啞鈴島的廟宇、石灘與西岸岩洞，收進一張可俯瞰的立體地圖。選一條路線，沿站點慢慢看。</p>
+        <p id="mast-route" class="mast-route"></p>
       </header>
-      <section id="routes" class="panel" aria-label="步行路線"></section>
+      <div id="sheet-body">
+        <nav id="chips" class="chips" aria-label="選擇路線"></nav>
+        <section id="mstops" class="mstops" aria-label="站點列表"></section>
+        <section id="routes" class="panel" aria-label="步行路線"></section>
+      </div>
     </div>
 
     <aside id="detail" class="panel" hidden aria-live="polite">

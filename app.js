@@ -6,7 +6,9 @@ const HOME = {
   center: [114.029, 22.208],
   zoom: 14.7,
   pitch: 62,
-  bearing: -32
+  bearing: -32,
+  mobileZoom: 13.9,
+  mobilePitch: 52
 };
 
 const DIRECT_TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
@@ -753,6 +755,25 @@ const ROUTES = [
 const routesEl = document.getElementById("routes");
 const detailEl = document.getElementById("detail");
 const statusEl = document.getElementById("status");
+const appEl = document.getElementById("app");
+const sheetEl = document.getElementById("stack");
+const sheetBody = document.getElementById("sheet-body");
+const chipsEl = document.getElementById("chips");
+const mstopsEl = document.getElementById("mstops");
+const handleEl = document.getElementById("sheet-handle");
+const mastEl = document.getElementById("mast");
+const closeBtn = document.getElementById("detail-close");
+
+/* 與 styles.css 的手機斷點一致 */
+const MOBILE_MQ = window.matchMedia("(max-width: 820px), (max-height: 520px) and (orientation: landscape) and (max-width: 1024px)");
+const LANDSCAPE_MQ = window.matchMedia("(max-height: 520px) and (orientation: landscape) and (max-width: 1024px)");
+const isMobile = () => MOBILE_MQ.matches;
+const isLandscapeMobile = () => LANDSCAPE_MQ.matches;
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let navControl = null;
+let attribControl = null;
+let sheetState = "collapsed";
 
 let map;
 let markers = [];
@@ -806,10 +827,211 @@ function renderList() {
     routesEl.appendChild(card);
   });
 
+  renderMobile();
+
   const note = document.createElement("p");
   note.className = "fine";
   note.textContent = "站點座標為約數。北社山海、東岸石徑、西灣尋洞的連線只表示步行順序；往聖方濟校園一線按開放街圖道路繪畫。兩者都不是官方步道軌跡。船期、泳灘與古蹟通道請以現場及主管部門最新公布為準。";
   routesEl.appendChild(note);
+}
+
+
+const FINE_NOTE = "站點座標為約數。北社山海、東岸石徑、西灣尋洞的連線只表示步行順序；往聖方濟校園一線按開放街圖道路繪畫。兩者都不是官方步道軌跡。船期、泳灘與古蹟通道請以現場及主管部門最新公布為準。";
+
+/* 手機：橫向路線膠囊 + 目前路線的站點列表 */
+function renderMobile() {
+  document.getElementById("mast-route").textContent = activeRoute
+    ? `${activeRoute.name} · ${activeRoute.stops.length} 站 · ${activeRoute.duration.replace(/（.*）/, "")}`
+    : "選一條路線開始";
+
+  chipsEl.innerHTML = "";
+  ROUTES.forEach((route) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    const on = activeRoute && activeRoute.id === route.id;
+    chip.className = "chip" + (on ? " active" : "");
+    chip.setAttribute("aria-pressed", on ? "true" : "false");
+    chip.style.setProperty("--chip", route.color);
+    chip.innerHTML = `<span class="chip-dot" style="background:${route.color}"></span><span class="chip-name">${route.name}</span><span class="chip-facts">${route.duration.replace(/（.*）/, "")} · ${route.stops.length} 站</span>`;
+    chip.addEventListener("click", () => {
+      // 先展開抽屜，再按新的抽屜高度框住整條路線
+      if (sheetState === "collapsed") setSheet("half", { recenter: false });
+      selectRoute(route.id);
+    });
+    chipsEl.appendChild(chip);
+  });
+
+  mstopsEl.innerHTML = "";
+  if (!activeRoute) return;
+  const route = activeRoute;
+  const blurb = document.createElement("p");
+  blurb.className = "route-blurb";
+  blurb.textContent = route.blurb;
+  mstopsEl.appendChild(blurb);
+  if (route.credit) {
+    const credit = document.createElement("p");
+    credit.className = "route-credit";
+    credit.textContent = route.credit;
+    mstopsEl.appendChild(credit);
+  }
+  const list = document.createElement("ol");
+  route.stops.forEach((stop, index) => {
+    const item = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "stop-btn" + (activeStop === index ? " active" : "") + (stop.photo ? " has-photo" : "");
+    const thumb = stop.photo ? `<img class="stop-thumb" src="${stop.photo.src}" alt="" loading="lazy" />` : "";
+    b.innerHTML = `<span class="stop-no" style="background:${route.color}">${index + 1}</span><span class="stop-name">${stop.name}</span>${thumb}`;
+    b.addEventListener("click", () => selectRoute(route.id, index));
+    item.appendChild(b);
+    list.appendChild(item);
+  });
+  mstopsEl.appendChild(list);
+  const fine = document.createElement("p");
+  fine.className = "fine";
+  fine.textContent = FINE_NOTE;
+  mstopsEl.appendChild(fine);
+}
+
+/* ---------- 底部抽屜 ---------- */
+function sheetHeights() {
+  const vh = window.innerHeight;
+  const handle = handleEl.offsetHeight || 24;
+  const collapsed = Math.round(handle + mastEl.offsetHeight + 2);
+  const landscape = isLandscapeMobile();
+  return {
+    collapsed,
+    half: Math.max(collapsed + 120, Math.round(vh * (landscape ? 0.62 : 0.45))),
+    full: Math.round(vh - (landscape ? 8 : Math.max(56, vh * 0.1)))
+  };
+}
+
+function setSheet(state, opts = {}) {
+  if (!isMobile()) return;
+  sheetState = state;
+  const h = sheetHeights()[state];
+  sheetEl.style.setProperty("--sheet-h", h + "px");
+  sheetEl.dataset.sheet = state;
+  handleEl.setAttribute("aria-expanded", state === "collapsed" ? "false" : "true");
+  if (state === "collapsed") sheetBody.scrollTop = 0;
+  if (opts.recenter !== false) recenterForSheet(h);
+}
+
+/* 抽屜高度改變後，讓目前站點或路線留在可見的地圖範圍中央 */
+function recenterForSheet(h) {
+  if (!map || !styleReady) return;
+  const pad = mobilePadding(h);
+  if (activeRoute && activeStop >= 0) {
+    const s = activeRoute.stops[activeStop];
+    map.easeTo({ center: [s.lng, s.lat], padding: pad, duration: reducedMotion() ? 0 : 450 });
+  } else {
+    map.easeTo({ padding: pad, duration: reducedMotion() ? 0 : 450 });
+  }
+}
+
+function mobilePadding(sheetH) {
+  const h = typeof sheetH === "number" ? sheetH : sheetHeights()[sheetState];
+  const w = window.innerWidth;
+  if (isLandscapeMobile()) {
+    const expanded = sheetState !== "collapsed";
+    const sw = sheetEl.getBoundingClientRect().width || Math.min(420, w * 0.52);
+    return { top: 16, bottom: expanded ? 16 : h + 12, left: expanded ? sw + 16 : 16, right: 64 };
+  }
+  return { top: 64, bottom: h + 16, left: 16, right: 56 };
+}
+
+function initSheetDrag() {
+  let startY = 0, startH = 0, lastY = 0, lastT = 0, vel = 0, moved = false, active = false;
+  const begin = (e) => {
+    if (!isMobile()) return;
+    if (e.target.closest && e.target.closest("button:not(#sheet-handle)")) return;
+    active = true; moved = false;
+    startY = lastY = e.clientY; lastT = performance.now(); vel = 0;
+    startH = sheetEl.getBoundingClientRect().height;
+    sheetEl.classList.add("dragging");
+    e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const move = (e) => {
+    if (!active) return;
+    const dy = e.clientY - startY;
+    if (Math.abs(dy) > 6) moved = true;
+    const now = performance.now();
+    vel = (e.clientY - lastY) / Math.max(1, now - lastT); // px/ms，正值 = 往下
+    lastY = e.clientY; lastT = now;
+    const hs = sheetHeights();
+    const h = Math.min(hs.full, Math.max(hs.collapsed, startH - dy));
+    sheetEl.style.setProperty("--sheet-h", h + "px");
+  };
+  const end = () => {
+    if (!active) return;
+    active = false;
+    sheetEl.classList.remove("dragging");
+    const order = ["collapsed", "half", "full"];
+    if (!moved) {
+      // 輕按：收起 ↔ 半開；全開時回到半開
+      setSheet(sheetState === "collapsed" ? "half" : sheetState === "full" ? "half" : "collapsed");
+      return;
+    }
+    const h = sheetEl.getBoundingClientRect().height;
+    const hs = sheetHeights();
+    let target;
+    if (vel < -0.5) target = order[Math.min(2, order.indexOf(nearest(h, hs)) + 1)];
+    else if (vel > 0.5) target = order[Math.max(0, order.indexOf(nearest(h, hs)) - 1)];
+    else target = nearest(h, hs);
+    if (sheetEl.dataset.view === "detail" && target === "full") target = "half";
+    setSheet(target);
+  };
+  const nearest = (h, hs) => Object.keys(hs).reduce((a, b) => (Math.abs(hs[b] - h) < Math.abs(hs[a] - h) ? b : a));
+  [handleEl, mastEl].forEach((el) => {
+    el.addEventListener("pointerdown", begin);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
+  });
+}
+
+/* 手機 / 桌面切換：移動資料卡位置、重新放置地圖控制 */
+function applyMode() {
+  const mobile = isMobile();
+  if (mobile && detailEl.parentElement !== sheetBody) sheetBody.appendChild(detailEl);
+  if (!mobile && detailEl.parentElement !== appEl) appEl.insertBefore(detailEl, document.querySelector(".map-tools"));
+  closeBtn.textContent = mobile ? "‹ 站點列表" : "關閉";
+  closeBtn.setAttribute("aria-label", mobile ? "返回站點列表" : "關閉站點資料");
+  sheetEl.dataset.view = !detailEl.hidden ? "detail" : "list";
+  if (mobile) {
+    setSheet(sheetState, { recenter: false });
+  } else {
+    sheetEl.style.removeProperty("--sheet-h");
+  }
+  placeControls();
+}
+
+function placeControls() {
+  if (!map) return;
+  const mobile = isMobile();
+  if (navControl) map.removeControl(navControl);
+  if (attribControl) map.removeControl(attribControl);
+  navControl = new maplibregl.NavigationControl({ visualizePitch: true });
+  // 與 MapLibre 預設版權控制相同的設定，桌面外觀不變
+  attribControl = new maplibregl.AttributionControl({
+    compact: true,
+    customAttribution: '<a href="https://maplibre.org/" target="_blank">MapLibre</a>'
+  });
+  // bottom-* 角落會把新控制插到最前，所以桌面先加版權、後加導航（與原本一致：導航在上）
+  if (mobile) {
+    map.addControl(navControl, "top-right");
+    map.addControl(attribControl, "top-right");
+    // 手機上版權說明預設收起成 (i)，按一下展開，避免遮住地圖
+    const collapseAttrib = () => {
+      const c = attribControl && attribControl._container;
+      if (c) { c.classList.remove("maplibregl-compact-show"); c.removeAttribute("open"); }
+    };
+    collapseAttrib();
+    map.once("idle", collapseAttrib);
+  } else {
+    map.addControl(attribControl, "bottom-right");
+    map.addControl(navControl, "bottom-right");
+  }
 }
 
 function clearMarkers() {
@@ -867,8 +1089,7 @@ function addMarkers(route) {
 }
 
 function padding() {
-  const narrow = window.innerWidth <= 820;
-  if (narrow) return { top: 150, bottom: 280, left: 24, right: 24 };
+  if (isMobile()) return mobilePadding();
   return { top: 70, bottom: 70, left: 450, right: detailEl.hidden ? 60 : 400 };
 }
 
@@ -879,9 +1100,9 @@ function frameRoute(route) {
   );
   map.fitBounds(bounds, {
     padding: padding(),
-    pitch: 58,
+    pitch: isMobile() ? 52 : 58,
     bearing: HOME.bearing,
-    duration: 1100,
+    duration: reducedMotion() ? 0 : 1100,
     maxZoom: 15.4
   });
 }
@@ -889,6 +1110,11 @@ function frameRoute(route) {
 function openDetail(route, index) {
   const stop = route.stops[index];
   detailEl.hidden = false;
+  sheetEl.dataset.view = "detail";
+  if (isMobile()) {
+    sheetBody.scrollTop = 0;
+    if (sheetState !== "half") setSheet("half", { recenter: false });
+  }
   document.getElementById("detail-kicker").textContent = `${route.name} · 第 ${index + 1} 站`;
   document.getElementById("detail-name").textContent = stop.name;
   document.getElementById("detail-text").textContent = stop.text;
@@ -900,6 +1126,7 @@ function openDetail(route, index) {
   // 任何站點都可帶一張相片：photo: { src, alt, w, h, note }，credit 為出處
   const figure = document.getElementById("detail-photo");
   const img = document.getElementById("detail-img");
+  figure.classList.remove("expanded");
   if (stop.photo) {
     img.src = stop.photo.src;
     img.alt = stop.photo.alt || stop.name;
@@ -928,15 +1155,19 @@ function focusStop(index) {
   renderList();
   addMarkers(activeRoute);
   const stop = activeRoute.stops[index];
-  map.flyTo({
+  const mobile = isMobile();
+  const camera = {
     center: [stop.lng, stop.lat],
-    zoom: 16.4,
-    pitch: 66,
+    zoom: mobile ? 16.1 : 16.4,
+    pitch: mobile ? 56 : 66,
     bearing: -24,
-    offset: window.innerWidth > 820 ? [40, 0] : [0, 40],
-    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1300,
+    duration: reducedMotion() ? 0 : 1300,
     essential: true
-  });
+  };
+  // 手機：以抽屜高度作 padding，讓標記落在可見地圖的中央
+  if (mobile) camera.padding = mobilePadding(sheetHeights().half);
+  else camera.offset = [40, 0];
+  map.flyTo(camera);
 }
 
 function selectRoute(id, stopIndex) {
@@ -950,6 +1181,7 @@ function selectRoute(id, stopIndex) {
   } else if (changed) {
     activeStop = -1;
     detailEl.hidden = true;
+    sheetEl.dataset.view = "list";
   }
   renderList();
   drawRoute(route);
@@ -967,7 +1199,9 @@ function goHome() {
     map.getSource("route").setData({ type: "FeatureCollection", features: [] });
   }
   renderList();
-  map.flyTo({ ...HOME, duration: 1000, essential: true });
+  sheetEl.dataset.view = "list";
+  const home = isMobile() ? { ...HOME, zoom: HOME.mobileZoom, pitch: HOME.mobilePitch, padding: mobilePadding() } : HOME;
+  map.flyTo({ ...home, duration: reducedMotion() ? 0 : 1000, essential: true });
 }
 
 function enableTerrain() {
@@ -981,7 +1215,7 @@ function enableTerrain() {
         maxzoom: 15
       });
     }
-    map.setTerrain({ source: "terrain-dem", exaggeration: 1.85 });
+    map.setTerrain({ source: "terrain-dem", exaggeration: isMobile() ? 1.45 : 1.85 });
     if (!map.getLayer("sky")) {
       map.addLayer({
         id: "sky",
@@ -1003,22 +1237,27 @@ function boot(index) {
   styleIndex = index;
   styleReady = false;
   const entry = STYLES[index];
+  const mobile = isMobile();
   map = new maplibregl.Map({
     container: "map",
     style: entry.url,
     center: HOME.center,
-    zoom: HOME.zoom,
-    pitch: HOME.pitch,
+    zoom: mobile ? HOME.mobileZoom : HOME.zoom,
+    pitch: mobile ? HOME.mobilePitch : HOME.pitch,
     bearing: HOME.bearing,
-    maxPitch: 72,
+    maxPitch: mobile ? 65 : 72,
+    // 手機：限制像素比，減輕 GPU 負擔
+    pixelRatio: mobile ? Math.min(window.devicePixelRatio || 1, 2) : undefined,
     minZoom: 13,
     maxBounds: [[113.99, 22.175], [114.065, 22.238]],
-    attributionControl: true,
+    attributionControl: false,
     localIdeographFontFamily: "'Noto Sans TC', 'PingFang TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif",
     // 代理模式下的保險：即使樣式內有漏改的網址，也轉到本機代理。
     transformRequest: entry.proxied ? (url) => ({ url: toProxy(url) }) : undefined
   });
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+  navControl = null;
+  attribControl = null;
+  placeControls();
 
   let failedOver = false;
   const failOver = (reason) => {
@@ -1055,17 +1294,30 @@ function boot(index) {
   });
 }
 
-document.getElementById("detail-close").addEventListener("click", () => {
+document.getElementById("detail-photo").addEventListener("click", (e) => {
+  if (!isMobile()) return;
+  e.currentTarget.classList.toggle("expanded");
+});
+
+closeBtn.addEventListener("click", () => {
   detailEl.hidden = true;
+  sheetEl.dataset.view = "list";
   activeStop = -1;
   renderList();
   if (activeRoute) addMarkers(activeRoute);
 });
 
 document.getElementById("reset-view").addEventListener("click", goHome);
-window.addEventListener("resize", () => map && map.resize());
+window.addEventListener("resize", () => {
+  if (map) map.resize();
+  if (isMobile()) setSheet(sheetState, { recenter: false });
+});
+MOBILE_MQ.addEventListener("change", applyMode);
+LANDSCAPE_MQ.addEventListener("change", applyMode);
 
 renderList();
+initSheetDrag();
+applyMode();
 
 if (typeof maplibregl === "undefined") {
   showStatus("地圖程式庫未能載入。請確認可以連接網絡後重新開啟。");

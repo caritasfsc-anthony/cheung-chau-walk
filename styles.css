@@ -358,30 +358,6 @@ h1 {
 
 .maplibregl-ctrl-attrib a { color: var(--gold) !important; }
 
-@media (max-width: 820px) {
-  #stack {
-    top: auto;
-    bottom: 10px;
-    left: 10px;
-    width: calc(100vw - 20px);
-    max-height: 46vh;
-  }
-  #mast { padding: 14px 14px 10px; }
-  h1 { font-size: 30px; }
-  .lede { display: none; }
-  #routes { border-radius: 0 0 16px 16px; }
-  #detail {
-    top: 10px;
-    right: 10px;
-    bottom: auto;
-    width: calc(100vw - 20px);
-    max-height: 42vh;
-    overflow: auto;
-  }
-  .map-tools { display: none; }
-  .vignette { background: linear-gradient(180deg, rgba(12,9,7,.45), transparent 22%, transparent 60%, rgba(12,9,7,.55)); }
-}
-
 /* 四條路線：未選取時只顯示標題與資料，選取後展開簡介與站點 */
 .route:not(.active) .route-blurb,
 .route:not(.active) .route-credit { display: none; }
@@ -432,4 +408,244 @@ h1 {
   font-size: 13px;
   line-height: 1.6;
   font-family: var(--sans);
+}
+
+/* ---------- 桌面版：手機專用元件不顯示 ---------- */
+#sheet-body { display: contents; }
+.sheet-handle, .mast-route, .chips, .mstops, .detail-back { display: none; }
+
+/* ---------- 手機版（直向 ≤820px，或橫向矮螢幕）：地圖全屏 + 底部抽屜 ---------- */
+@media (max-width: 820px), (max-height: 520px) and (orientation: landscape) and (max-width: 1024px) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  #app { height: 100vh; height: 100dvh; }
+
+  .vignette {
+    background: linear-gradient(180deg, rgba(12, 9, 7, 0.38), transparent 16%);
+  }
+
+  /* 抽屜本體 */
+  #stack {
+    position: fixed;
+    z-index: 4;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: none;
+    height: var(--sheet-h, 104px);
+    display: flex;
+    flex-direction: column;
+    background: rgba(18, 14, 11, 0.94);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.38);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transition: height 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    overflow: hidden;
+  }
+  #stack.dragging { transition: none; }
+
+  .sheet-handle {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 100%;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: grab;
+    touch-action: none;
+  }
+  .sheet-handle span {
+    width: 44px;
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(244, 239, 230, 0.35);
+  }
+
+  /* 精簡標題列：洲印 + 標題 + 目前路線 */
+  #mast {
+    position: static;
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+    align-items: center;
+    padding: 0 18px 14px;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    border-radius: 0;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+  }
+  #mast .eyebrow {
+    grid-row: 1 / span 2;
+    margin: 0;
+    font-size: 0;
+    letter-spacing: 0;
+  }
+  #mast .seal { width: 40px; height: 40px; font-size: 20px; }
+  #mast h1 { font-size: 22px; line-height: 1.2; letter-spacing: 0.02em; }
+  #mast .lede { display: none; }
+  .mast-route {
+    display: block;
+    margin: 2px 0 0;
+    color: var(--gold);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #sheet-body {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 0 0 16px;
+  }
+  #stack[data-sheet="collapsed"] #sheet-body { overflow: hidden; }
+
+  /* 桌面的路線卡在手機改用橫向膠囊 */
+  #routes { display: none; }
+
+  .chips {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 2px 16px 12px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-height: 56px;
+    max-width: 72vw;
+    padding: 8px 14px 8px 12px;
+    display: grid;
+    grid-template-columns: 10px auto;
+    column-gap: 9px;
+    align-items: center;
+    text-align: left;
+    color: var(--paper);
+    background: rgba(244, 239, 230, 0.06);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .chip-dot { grid-row: 1 / span 2; width: 10px; height: 10px; border-radius: 50%; }
+  .chip-name { font-family: var(--serif); font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .chip-facts { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .chip.active { border-color: var(--chip, var(--cinnabar)); background: rgba(244, 239, 230, 0.12); }
+
+  .mstops { display: block; padding: 0 16px; }
+  .mstops .route-blurb { margin: 0 2px 8px; font-size: 14px; }
+  .mstops .route-credit { margin: 0 2px 8px; }
+  .mstops ol { list-style: none; margin: 0; padding: 0; }
+  .mstops .stop-btn {
+    min-height: 48px;
+    font-size: 16px;
+    grid-template-columns: 30px 1fr;
+    padding: 6px 6px;
+  }
+  .mstops .stop-btn.has-photo { grid-template-columns: 30px 1fr 64px; }
+  .mstops .stop-no { width: 26px; height: 26px; font-size: 13px; }
+  .mstops .stop-thumb { width: 64px; height: 40px; }
+  .mstops .fine { margin: 10px 2px 0; }
+
+  /* 站點資料卡：放進抽屜內，取代列表 */
+  #detail {
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    margin: 0 12px;
+    padding: 12px 14px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--cinnabar);
+    box-shadow: none;
+    backdrop-filter: none;
+    background: rgba(244, 239, 230, 0.04);
+  }
+  #stack[data-view="detail"] .chips,
+  #stack[data-view="detail"] .mstops { display: none; }
+  #detail-close {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+    order: -1;
+  }
+  .detail-top { justify-content: flex-start; gap: 10px; }
+  #detail h2 { font-size: 21px; margin: 6px 0 8px; }
+  /* 相片在手機先以縮圖放在文字旁，按一下放大 */
+  #detail-photo {
+    float: right;
+    width: 42%;
+    margin: 2px 0 8px 12px;
+    cursor: zoom-in;
+  }
+  #detail-photo img { max-height: 120px; aspect-ratio: 3 / 2; border-radius: 8px; }
+  #detail-photo figcaption { font-size: 10.5px; line-height: 1.4; }
+  #detail-photo.expanded { float: none; width: auto; margin: 0 0 10px; cursor: zoom-out; }
+  #detail-photo.expanded img { max-height: 42vh; aspect-ratio: auto; }
+  #detail-meta { clear: both; }
+  #detail-text { font-size: 15.5px; line-height: 1.7; }
+  .en { font-size: 14px; }
+
+  /* 地圖控制：移到上方，不被抽屜遮住 */
+  .map-tools {
+    left: calc(10px + env(safe-area-inset-left, 0px));
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    display: block;
+  }
+  #reset-view {
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  }
+  #map-note { display: none; }
+  .maplibregl-ctrl-top-right {
+    top: env(safe-area-inset-top, 0px);
+    right: env(safe-area-inset-right, 0px);
+  }
+  .maplibregl-ctrl-group button { width: 44px; height: 44px; }
+  .maplibregl-ctrl-attrib.maplibregl-compact { min-height: 24px; }
+
+  .status {
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    width: calc(100vw - 32px);
+    text-align: center;
+  }
+}
+
+/* 橫向手機：抽屜靠左，地圖留在右邊 */
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 1024px) {
+  #stack {
+    left: env(safe-area-inset-left, 0px);
+    right: auto;
+    width: min(420px, 52vw);
+    border-radius: 18px 18px 0 0;
+  }
+  #mast { padding-bottom: 8px; }
+  #mast .seal { width: 34px; height: 34px; font-size: 17px; }
+  #mast h1 { font-size: 19px; }
+  .map-tools { left: auto; right: calc(64px + env(safe-area-inset-right, 0px)); }
 }
