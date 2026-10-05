@@ -531,6 +531,45 @@ closeBtn.addEventListener("click", () => {
 
 document.getElementById("reset-view").addEventListener("click", goHome);
 
+/* 我的位置：可開可關，用藍點顯示，首次定位時把鏡頭移過去 */
+const locateBtn = document.getElementById("locate-me");
+let geoWatch = null;
+let meMarker = null;
+let meFirstFix = false;
+function setLocateUI(on, label) {
+  locateBtn.setAttribute("aria-pressed", String(on));
+  locateBtn.textContent = label || (on ? "我的位置：開" : "我的位置：關");
+}
+function stopLocate(label) {
+  if (geoWatch !== null) navigator.geolocation.clearWatch(geoWatch);
+  geoWatch = null;
+  if (meMarker) { meMarker.remove(); meMarker = null; }
+  setLocateUI(false, label);
+}
+locateBtn.addEventListener("click", () => {
+  if (geoWatch !== null) { stopLocate(); return; }
+  if (!("geolocation" in navigator)) { setLocateUI(false, "此瀏覽器不支援定位"); return; }
+  meFirstFix = false;
+  setLocateUI(true, "定位中…");
+  geoWatch = navigator.geolocation.watchPosition((pos) => {
+    if (!map) return;
+    const ll = [pos.coords.longitude, pos.coords.latitude];
+    if (!meMarker) {
+      const el = document.createElement("div");
+      el.className = "me-dot";
+      el.setAttribute("aria-label", "我的位置");
+      meMarker = new maplibregl.Marker({ element: el }).setLngLat(ll).addTo(map);
+    } else meMarker.setLngLat(ll);
+    setLocateUI(true);
+    if (!meFirstFix) {
+      meFirstFix = true;
+      map.flyTo({ center: ll, zoom: Math.max(map.getZoom(), 16), duration: reducedMotion() ? 0 : 1200 });
+    }
+  }, (err) => {
+    stopLocate(err.code === 1 ? "未允許定位" : "暫時找不到位置");
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+});
+
 /* 底圖切換：地圖 / 航照 / OSM；換樣式後重加地形與路線（標記為 DOM，不受影響） */
 function syncStyleSwitch() {
   const kind = currentKind(map);
