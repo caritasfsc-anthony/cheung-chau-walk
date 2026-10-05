@@ -539,7 +539,7 @@ let meMarker = null;
 let meFirstFix = false;
 function setLocateUI(on, label) {
   locateBtn.setAttribute("aria-pressed", String(on));
-  locateBtn.textContent = label || (on ? "我的位置：開" : "我的位置：關");
+  locateBtn.textContent = label || ("我的位置");
 }
 function stopLocate(label) {
   if (geoWatch !== null) navigator.geolocation.clearWatch(geoWatch);

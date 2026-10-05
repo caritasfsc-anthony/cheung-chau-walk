@@ -54,7 +54,7 @@ export function initFerry({ getMap, button, panel }) {
   function set(state) {
     on = state;
     button.setAttribute("aria-pressed", String(on));
-    button.textContent = on ? "新渡輪：開" : "新渡輪：關";
+    button.textContent = "新渡輪";
     panel.hidden = !on;
     clearInterval(timer);
     timer = null;
