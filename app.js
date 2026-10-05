@@ -6,6 +6,7 @@
 import { BUILTIN_SITE } from "./routes-data.js";
 import { initFerry } from "./ferry.js";
 import { initServices, applyServices } from "./poi.js";
+import { initSaved } from "./saved.js";
 import {
   tiles, detectProxy, createMap, enableTerrain as addTerrain, routeCoords, setRouteLine,
   clearRouteLine, esc, safeColor, switchStyle, currentKind
@@ -704,3 +705,4 @@ document.getElementById("detail-next").addEventListener("click", () => {
 
 initFerry({ getMap: () => map, button: document.getElementById("ferry-toggle"), panel: document.getElementById("ferry-panel") });
 initServices({ getMap: () => map, buttons: { toilets: document.getElementById("svc-toilets"), food: document.getElementById("svc-food") } });
+initSaved({ getMap: () => map, button: document.getElementById("saved-toggle"), panel: document.getElementById("saved-panel") });
