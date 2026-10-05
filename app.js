@@ -4,6 +4,7 @@
    兩者都轉成同一個 site 物件，由下面同一套顯示程式處理。 */
 
 import { BUILTIN_SITE } from "./routes-data.js";
+import { initFerry } from "./ferry.js";
 import {
   tiles, detectProxy, createMap, enableTerrain as addTerrain, routeCoords, setRouteLine,
   clearRouteLine, esc, safeColor, switchStyle, currentKind
@@ -697,3 +698,5 @@ document.getElementById("detail-prev").addEventListener("click", () => {
 document.getElementById("detail-next").addEventListener("click", () => {
   if (activeRoute && activeStop < activeRoute.stops.length - 1) focusStop(activeStop + 1);
 });
+
+initFerry({ getMap: () => map, button: document.getElementById("ferry-toggle"), panel: document.getElementById("ferry-panel") });

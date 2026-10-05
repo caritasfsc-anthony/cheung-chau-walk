@@ -34,6 +34,7 @@ ALLOWED = {
     "s3.amazonaws.com": ("/elevation-tiles-prod/",),
     "unpkg.com": ("/maplibre-gl@",),
     "mapapi.geodata.gov.hk": ("/gs/api/v1.0.0/xyz/",),
+    "www.sunferry.com.hk": ("/eta/",),
 }
 # 會在 JSON 內被改寫成本機代理的主機
 REWRITE_HOSTS = ("tiles.openfreemap.org", "s3.amazonaws.com")

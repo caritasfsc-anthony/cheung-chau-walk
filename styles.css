@@ -276,7 +276,7 @@ h1 {
   gap: 8px;
 }
 
-#reset-view, #locate-me {
+#reset-view, #locate-me, #ferry-toggle {
   background: rgba(18, 14, 11, 0.88);
   color: var(--paper);
   border: 1px solid var(--line);
@@ -287,7 +287,7 @@ h1 {
   font-size: 13px;
 }
 
-#reset-view:hover, #locate-me:hover { border-color: var(--gold); }
+#reset-view:hover, #locate-me:hover, #ferry-toggle:hover { border-color: var(--gold); }
 
 #style-switch {
   display: inline-flex;
@@ -636,7 +636,7 @@ h1 {
   }
   #style-switch { order: 2; }
   #style-switch button { min-height: 36px; font-size: 14px; }
-  #reset-view, #locate-me {
+  #reset-view, #locate-me, #ferry-toggle {
     min-height: 44px;
     padding: 0 16px;
     font-size: 14px;
@@ -716,4 +716,24 @@ h1 {
   width: 18px; height: 18px; border-radius: 50%;
   background: #ff8a1f; border: 3px solid #fff;
   box-shadow: 0 0 0 6px rgba(255,138,31,0.3), 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* 新渡輪即時班次 */
+#ferry-toggle[aria-pressed="true"] { background: #1f8a70; color: #fff; }
+#ferry-panel {
+  background: rgba(18, 14, 11, 0.9); color: var(--paper);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 12px; font-size: 12px; line-height: 1.5; max-width: 260px;
+}
+#ferry-panel p { margin: 0; }
+#ferry-panel .ferry-head { color: var(--gold); margin-bottom: 2px; }
+.ferry-pin { display: flex; align-items: center; gap: 4px; pointer-events: none; }
+.ferry-icon {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: #1f8a70; color: #fff; font-size: 16px; border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.ferry-label {
+  background: rgba(255,255,255,0.92); color: #123; font-size: 11px; font-weight: 600;
+  padding: 1px 6px; border-radius: 8px; white-space: nowrap;
 }

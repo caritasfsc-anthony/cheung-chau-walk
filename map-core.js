@@ -45,7 +45,7 @@ export const DIRECT_STYLES = [
   { kind: "map", style: () => landsdStyle("map", false), label: "地政總署地形圖", minZoom: 10, proxied: false },
   { kind: "imagery", style: () => landsdStyle("imagery", false), label: "地政總署航照", minZoom: 10, proxied: false }
 ];
-const PROXY_HOSTS = ["tiles.openfreemap.org", "s3.amazonaws.com", "mapapi.geodata.gov.hk"];
+const PROXY_HOSTS = ["tiles.openfreemap.org", "s3.amazonaws.com", "mapapi.geodata.gov.hk", "www.sunferry.com.hk"];
 const STYLE_TIMEOUT_MS = 12000;
 
 /* 由 serve.py 提供時改用 /proxy/<host>/<path>；直接開檔或其他伺服器（GitHub Pages 等）則用原網址。 */
