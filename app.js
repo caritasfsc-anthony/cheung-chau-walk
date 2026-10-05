@@ -64,7 +64,7 @@ function renderMast() {
   const lede = document.getElementById("mast-lede");
   lede.textContent = site.lede;
   lede.hidden = !site.lede;
-  if (!site.builtin) document.title = site.title + " · 長洲立體步道";
+  if (!site.builtin) document.title = site.title;
   document.getElementById("map").setAttribute("aria-label", site.title + " 立體地圖");
 }
 
@@ -384,6 +384,9 @@ function openDetail(route, index) {
   }
   document.getElementById("detail-kicker").textContent = `${route.name} · 第 ${index + 1} 站`;
   document.getElementById("detail-name").textContent = stop.name;
+  document.getElementById("detail-num").textContent = String(index + 1);
+  document.getElementById("detail-prev").hidden = index <= 0;
+  document.getElementById("detail-next").hidden = index >= route.stops.length - 1;
   document.getElementById("detail-text").textContent = stop.text;
 
   const en = document.getElementById("detail-en");
@@ -647,3 +650,11 @@ async function main() {
 }
 
 main();
+
+/* 站點卡左右三角形：上一站／下一站 */
+document.getElementById("detail-prev").addEventListener("click", () => {
+  if (activeRoute && activeStop > 0) focusStop(activeStop - 1);
+});
+document.getElementById("detail-next").addEventListener("click", () => {
+  if (activeRoute && activeStop < activeRoute.stops.length - 1) focusStop(activeStop + 1);
+});

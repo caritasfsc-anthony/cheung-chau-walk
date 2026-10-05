@@ -40,10 +40,10 @@ export function landsdStyle(kind, proxied) {
 
 /* kind：map / imagery / osm（供切換鈕使用）；style 可為網址或樣式物件 */
 export const DIRECT_STYLES = [
-  { kind: "map", style: () => landsdStyle("map", false), label: "地政總署地形圖", minZoom: 10, proxied: false },
-  { kind: "imagery", style: () => landsdStyle("imagery", false), label: "地政總署航照", minZoom: 10, proxied: false },
   { kind: "osm", style: () => "https://tiles.openfreemap.org/styles/liberty", label: "OpenFreeMap Liberty", proxied: false },
-  { kind: "osm", style: () => "https://tiles.openfreemap.org/styles/dark", label: "OpenFreeMap Dark", proxied: false }
+  { kind: "osm", style: () => "https://tiles.openfreemap.org/styles/dark", label: "OpenFreeMap Dark", proxied: false },
+  { kind: "map", style: () => landsdStyle("map", false), label: "地政總署地形圖", minZoom: 10, proxied: false },
+  { kind: "imagery", style: () => landsdStyle("imagery", false), label: "地政總署航照", minZoom: 10, proxied: false }
 ];
 const PROXY_HOSTS = ["tiles.openfreemap.org", "s3.amazonaws.com", "mapapi.geodata.gov.hk"];
 const STYLE_TIMEOUT_MS = 12000;
