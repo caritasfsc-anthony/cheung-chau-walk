@@ -1,4 +1,4 @@
-/* 長洲立體步道：Firebase（登入 + Firestore）共用模組
+/* 長洲足印：Firebase（登入 + Firestore）共用模組
    Firebase JS SDK 模組版，直接由 gstatic CDN 載入，無需建置步驟。 */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
@@ -193,7 +193,7 @@ export async function loadPhotos(mapId, ids) {
       const p = await getPhoto(mapId, id);
       if (p) out[id] = p;
     } catch (error) {
-      console.warn("[長洲立體步道] 相片讀取失敗", id, error && error.code);
+      console.warn("[長洲足印] 相片讀取失敗", id, error && error.code);
     }
   }));
   return out;

@@ -8,7 +8,7 @@
   "auth": {
     "providers": {
       "googleSignIn": {
-        "oAuthBrandDisplayName": "長洲立體步道",
+        "oAuthBrandDisplayName": "長洲足印",
         "supportEmail": "anthonykwok@caritasfsc.edu.hk"
       }
     }

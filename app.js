@@ -1,4 +1,4 @@
-/* 長洲立體步道：檢視頁
+/* 長洲足印：檢視頁
    index.html            → 內置長洲路線（routes-data.js）
    index.html?map=<id>   → 老師在 Firestore 製作的地圖
    兩者都轉成同一個 site 物件，由下面同一套顯示程式處理。 */
@@ -68,7 +68,7 @@ function renderMast() {
   lede.textContent = site.lede;
   lede.hidden = !site.lede;
   if (!site.builtin) document.title = site.title;
-  document.getElementById("map").setAttribute("aria-label", site.title + " 立體地圖");
+  document.getElementById("map").setAttribute("aria-label", site.title + " 地圖");
   const mq = document.getElementById("marquee");
   const mqText = String(site.marquee || "").trim();
   mq.hidden = !mqText;

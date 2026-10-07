@@ -1,4 +1,4 @@
-/* 長洲立體步道：編輯地圖（editor.html?map=<id>） */
+/* 長洲足印：編輯地圖（editor.html?map=<id>） */
 import {
   watchAuth, signInSchool, signOutUser, friendlyDbError, LIMITS,
   getMap, saveMapDoc, loadPhotos, photoIdsOf, putPhoto, newPhotoId, deletePhoto, newId,
@@ -521,7 +521,7 @@ async function save() {
     state.orphanPhotos = new Set();
     const failed = [];
     await Promise.all(stale.map((id) => deletePhoto(mapId, id).then(() => { delete state.photos[id]; })
-      .catch((error) => { failed.push(id); console.warn("[長洲立體步道] 相片刪除失敗", id, error && error.code); })));
+      .catch((error) => { failed.push(id); console.warn("[長洲足印] 相片刪除失敗", id, error && error.code); })));
     failed.forEach((id) => state.orphanPhotos.add(id));
     setStatus(failed.length ? `已儲存，但有 ${failed.length} 張舊相片未能刪除，下次儲存會再試。` : "");
   } catch (error) {

@@ -1,4 +1,4 @@
-/* 長洲立體步道：老師後台（登入、我的地圖、新增地圖） */
+/* 長洲足印：老師後台（登入、我的地圖、新增地圖） */
 import {
   watchAuth, signInSchool, signOutUser, friendlyDbError, LIMITS,
   listMyMaps, createMapDoc, saveMapDoc, deleteMapAndPhotos, putPhoto,

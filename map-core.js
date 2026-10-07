@@ -1,4 +1,4 @@
-/* 長洲立體步道：地圖底層（樣式、地形、本機代理偵測），檢視頁與編輯器共用 */
+/* 長洲足印：地圖底層（樣式、地形、本機代理偵測），檢視頁與編輯器共用 */
 
 export const DIRECT_TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const LANDSD = "https://mapapi.geodata.gov.hk/gs/api/v1.0.0/xyz";
@@ -127,7 +127,7 @@ export function createMap(opts) {
       if (ready || failed) return;
       failed = true;
       clearTimeout(timer);
-      console.warn("[長洲立體步道] 樣式失敗：" + entry.label + "（" + reason + "）");
+      console.warn("[長洲足印] 樣式失敗：" + entry.label + "（" + reason + "）");
       map.remove();
       if (index < tiles.styles.length - 1) {
         index += 1;
