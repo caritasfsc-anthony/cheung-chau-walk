@@ -1,4 +1,4 @@
-/* 長洲立體步道：老師後台（沿用 styles.css 的變數與字體） */
+/* 長洲足印：老師後台（沿用 styles.css 的變數與字體） */
 html.adm, html.adm body.adm { height: auto; min-height: 100%; overflow: auto; overscroll-behavior: auto; }
 body.adm { background: var(--ink); color: var(--paper); font-family: var(--sans); line-height: 1.6; }
 .adm [hidden] { display: none !important; }

@@ -1,4 +1,4 @@
-/* 長洲立體步道：相片壓縮（後台與編輯器共用）
+/* 長洲足印：相片壓縮（後台與編輯器共用）
    把檔案／Blob 縮小並轉成 JPEG data URL，確保不超過 Firestore 文件大小限制。 */
 
 function loadImage(blob) {
