@@ -1,6 +1,6 @@
 /* 長洲足印：檢視頁
-   index.html            → 內置長洲路線（routes-data.js）
-   index.html?map=<id>   → 老師在 Firestore 製作的地圖
+   index.html            → 內置空殼地圖（routes-data.js，無預設路線）
+   index.html?map=<id>   → 後台在 Firestore 製作的地圖
    兩者都轉成同一個 site 物件，由下面同一套顯示程式處理。 */
 
 import { BUILTIN_SITE } from "./routes-data.js";
@@ -59,7 +59,7 @@ const shortDuration = (route) => String(route.duration || "").replace(/（.*）/
 const routeFacts = (route) => [route.area, route.duration, route.stops.length + " 站"].filter(Boolean).join(" · ");
 const thumbHtml = (stop) => stop.photo ? `<img class="stop-thumb" src="${esc(stop.photo.src)}" alt="" loading="lazy" />` : "";
 
-/* 刊頭：內置版本與老師地圖共用 */
+/* 刊頭：內置版本與後台地圖共用 */
 function renderMast() {
   document.getElementById("mast-seal").textContent = site.seal;
   document.getElementById("mast-eyebrow").textContent = site.eyebrow;
@@ -424,7 +424,7 @@ function openDetail(route, index) {
   }
 
   let source;
-  if (!site.builtin) source = "位置由製作老師標示，屬約數";
+  if (!site.builtin) source = "位置由管理員標示，屬約數";
   else source = route.credit
     ? (stop.approx ? "位置按路線圖估計，屬約數" : "座標取自開放街圖，屬約數") + " · 指示文字取自路線圖"
     : "只收錄已核對的公開記述";
@@ -603,7 +603,7 @@ window.addEventListener("resize", () => {
 MOBILE_MQ.addEventListener("change", applyMode);
 LANDSCAPE_MQ.addEventListener("change", applyMode);
 
-/* ---------- 老師地圖：由 Firestore 讀取 ---------- */
+/* ---------- 後台地圖：由 Firestore 讀取 ---------- */
 function showGate({ title, text, signIn = false, error = "" }) {
   gateEl.hidden = false;
   document.getElementById("gate-title").textContent = title;
@@ -632,7 +632,7 @@ async function loadRemoteSite(mapId) {
       signInBtn.disabled = true;
       const msg = await fb.signInSchool();
       signInBtn.disabled = false;
-      if (msg) showGate({ title: "需要學校帳戶登入", text: "此地圖只限學校帳戶查看，或尚未發佈。", signIn: true, error: msg });
+      if (msg) showGate({ title: "需要登入", text: "此地圖尚未發佈，或只限管理員查看。", signIn: true, error: msg });
     };
     fb.watchAuth(async (user, message) => {
       if (message) authMessage = message;
@@ -658,13 +658,13 @@ async function loadRemoteSite(mapId) {
         if (error && error.code === "permission-denied") {
           if (!user) {
             showGate({
-              title: "需要學校帳戶登入",
-              text: "此地圖只限學校帳戶查看，或尚未發佈。請以 @caritasfsc.edu.hk 學校 Google 帳戶登入。",
+              title: "需要登入",
+              text: "此地圖尚未發佈，或只限管理員查看。請以 info@rgb-workshop.com 登入。",
               signIn: true,
               error: authMessage
             });
           } else {
-            showGate({ title: "未能查看這張地圖", text: "地圖尚未發佈，或你沒有查看權限。如有需要，請聯絡製作的老師。" });
+            showGate({ title: "未能查看這張地圖", text: "地圖尚未發佈，或你沒有查看權限。如有需要，請聯絡地圖管理員。" });
           }
         } else {
           showGate({ title: "未能讀取地圖", text: fb.friendlyDbError(error) });
