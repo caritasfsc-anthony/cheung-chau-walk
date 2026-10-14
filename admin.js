@@ -1,17 +1,15 @@
-/* 長洲足印：老師後台（登入、我的地圖、新增地圖） */
+/* 長洲足印：地圖後台（登入、我的地圖、新增地圖） */
 import {
   watchAuth, signInSchool, signOutUser, friendlyDbError, LIMITS,
-  listMyMaps, createMapDoc, saveMapDoc, deleteMapAndPhotos, putPhoto,
-  newMapId, newPhotoId, newId, pathToFirestore
+  listMyMaps, createMapDoc, saveMapDoc, deleteMapAndPhotos,
+  newMapId
 } from "./firebase-client.js";
-import { BUILTIN_SITE } from "./routes-data.js";
-import { compressImage } from "./photo-utils.js";
 
 const $ = (id) => document.getElementById(id);
 const els = {
   status: $("status"), signInCard: $("signInCard"), signInBtn: $("signInBtn"), authError: $("authError"),
   userBox: $("userBox"), userName: $("userName"), userEmail: $("userEmail"), signOutBtn: $("signOutBtn"),
-  area: $("app-area"), newTitle: $("newTitle"), newBlankBtn: $("newBlankBtn"), newTemplateBtn: $("newTemplateBtn"),
+  area: $("app-area"), newTitle: $("newTitle"), newBlankBtn: $("newBlankBtn"),
   newProgress: $("newProgress"), mapList: $("mapList")
 };
 
@@ -88,7 +86,7 @@ async function refreshList() {
 
 function mapCard(m) {
   const pubBadge = el("span", { class: "adm-badge " + (m.published ? "is-on" : "is-off"), text: m.published ? "已發佈" : "未發佈" });
-  const visBadge = el("span", { class: "adm-badge", text: m.visibility === "public" ? "公開" : "只限學校" });
+  const visBadge = el("span", { class: "adm-badge", text: m.visibility === "public" ? "公開" : "只限管理員" });
   const routesCount = (m.routes || []).length;
 
   const run = async (btn, fn, okMsg) => {
@@ -102,12 +100,12 @@ function mapCard(m) {
     m.published ? `「${m.title}」已取消發佈。` : `「${m.title}」已發佈。`));
 
   const visSel = el("select", { class: "adm-select", "aria-label": "可見範圍" }, [
-    el("option", { value: "school", text: "只限學校" }),
+    el("option", { value: "school", text: "只限管理員" }),
     el("option", { value: "public", text: "公開" })
   ]);
   visSel.value = m.visibility === "public" ? "public" : "school";
   visSel.addEventListener("change", () => run(visSel, () => saveMapDoc(m.id, { visibility: visSel.value }),
-    `「${m.title}」可見範圍已改為${visSel.value === "public" ? "公開" : "只限學校"}。`));
+    `「${m.title}」可見範圍已改為${visSel.value === "public" ? "公開" : "只限管理員"}。`));
 
   const copyBtn = el("button", { type: "button", class: "adm-btn", text: "複製連結" });
   copyBtn.addEventListener("click", async () => {
@@ -150,82 +148,24 @@ function readTitle() {
 function setBusy(on) {
   busy = on;
   els.newBlankBtn.disabled = on;
-  els.newTemplateBtn.disabled = on;
 }
 
-/* 內置路線 → Firestore 格式；需要上載的相片收集在 jobs */
-function convertTemplate(mapId) {
-  const jobs = [];
-  const routes = BUILTIN_SITE.routes.map((r) => {
-    const route = {
-      id: newId("r"),
-      name: r.name || "",
-      theme: r.theme || "",
-      area: r.area || "",
-      duration: r.duration || "",
-      color: r.color || "#e25b3a",
-      blurb: r.blurb || "",
-      stops: (r.stops || []).map((s) => {
-        const stop = { id: newId("s"), name: s.name || "", body: s.text || "", lat: s.lat, lng: s.lng };
-        if (s.en) stop.bodyEn = s.en;
-        if (s.credit) stop.photoCredit = s.credit;
-        if (s.photo && s.photo.src) {
-          stop.photoId = newPhotoId(mapId);
-          jobs.push({ photoId: stop.photoId, src: s.photo.src, name: stop.name });
-        }
-        return stop;
-      })
-    };
-    if (r.credit) route.credit = r.credit;
-    const path = pathToFirestore(r.path);
-    if (path && path.length > 1) route.path = path;
-    return route;
-  });
-  return { routes, jobs };
-}
-
-async function createMap(fromTemplate) {
+async function createMap() {
   if (busy || !currentUser) return;
   const title = readTitle();
   if (!title) return;
   setBusy(true);
   const mapId = newMapId();
-  const failed = [];
   try {
-    let routes = [];
-    let jobs = [];
-    if (fromTemplate) ({ routes, jobs } = convertTemplate(mapId));
     els.newProgress.textContent = "正在建立地圖…";
     await createMapDoc(mapId, currentUser, {
       title,
-      description: fromTemplate ? (BUILTIN_SITE.lede || "") : "",
+      description: "",
       center: { lat: 22.208, lng: 114.029 },
       zoom: 14.7,
-      routes
+      routes: []
     });
-    for (let i = 0; i < jobs.length; i++) {
-      const job = jobs[i];
-      els.newProgress.textContent = `正在複製相片 ${i + 1} / ${jobs.length}…`;
-      try {
-        const res = await fetch(job.src);
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const photo = await compressImage(await res.blob(), { maxDim: 1280, quality: 0.75, maxChars: LIMITS.photoChars });
-        await putPhoto(mapId, job.photoId, currentUser.uid, photo);
-      } catch (error) {
-        console.warn("[老師後台] 相片複製失敗", job.src, error);
-        failed.push(job.name);
-      }
-    }
-    if (failed.length) {
-      // 移除失敗相片的 photoId，避免地圖指向不存在的相片
-      const bad = new Set(jobs.filter((j) => failed.includes(j.name)).map((j) => j.photoId));
-      routes.forEach((r) => r.stops.forEach((s) => { if (bad.has(s.photoId)) delete s.photoId; }));
-      await saveMapDoc(mapId, { routes });
-      els.newProgress.textContent = `地圖已建立，但有 ${failed.length} 張相片未能複製（${failed.join("、")}），可在編輯器補上。即將前往編輯器…`;
-      await new Promise((r) => setTimeout(r, 2500));
-    } else {
-      els.newProgress.textContent = "完成！正在前往編輯器…";
-    }
+    els.newProgress.textContent = "完成！正在前往編輯器…";
     location.href = editUrl(mapId);
   } catch (error) {
     els.newProgress.textContent = "建立失敗：" + (error && error.code ? friendlyDbError(error) : (error && error.message) || "未知錯誤");
@@ -233,6 +173,5 @@ async function createMap(fromTemplate) {
   }
 }
 
-els.newBlankBtn.addEventListener("click", () => createMap(false));
-els.newTemplateBtn.addEventListener("click", () => createMap(true));
-els.newTitle.addEventListener("keydown", (e) => { if (e.key === "Enter") createMap(false); });
+els.newBlankBtn.addEventListener("click", () => createMap());
+els.newTitle.addEventListener("keydown", (e) => { if (e.key === "Enter") createMap(); });

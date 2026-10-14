@@ -15,7 +15,7 @@
 </head>
 <body class="adm ed">
   <header class="adm-top ed-top">
-    <a class="adm-back" href="admin.html">← 老師後台</a>
+    <a class="adm-back" href="admin.html">← 地圖後台</a>
     <h1 class="adm-title">編輯地圖</h1>
     <span class="ed-dirty" id="dirtyState" aria-live="polite"></span>
     <div class="adm-row ed-top-actions">
@@ -28,8 +28,8 @@
   <p class="adm-status ed-status" id="status" role="status" aria-live="polite"></p>
 
   <section class="adm-card adm-signin" id="signInCard" hidden>
-    <h2>以學校帳戶登入</h2>
-    <p>編輯地圖只限 <strong>@caritasfsc.edu.hk</strong> 學校 Google 帳戶使用。</p>
+    <h2>登入後台</h2>
+    <p>編輯地圖只限 <strong>info@rgb-workshop.com</strong> 登入。</p>
     <button type="button" class="adm-btn adm-btn-primary" id="signInBtn">以 Google 帳戶登入</button>
     <p class="adm-error" id="authError" role="alert"></p>
   </section>
@@ -37,7 +37,7 @@
   <section class="adm-card adm-signin" id="blockedCard" hidden>
     <h2>未能編輯此地圖</h2>
     <p id="blockedMsg"></p>
-    <a class="adm-btn adm-btn-primary" href="admin.html">返回老師後台</a>
+    <a class="adm-btn adm-btn-primary" href="admin.html">返回地圖後台</a>
   </section>
 
   <div class="ed-layout" id="editorArea" hidden>
