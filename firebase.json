@@ -8,8 +8,8 @@
   "auth": {
     "providers": {
       "googleSignIn": {
-        "oAuthBrandDisplayName": "長洲足印",
-        "supportEmail": "anthonykwok@caritasfsc.edu.hk"
+        "oAuthBrandDisplayName": "長洲足印 RGB",
+        "supportEmail": "info@rgb-workshop.com"
       }
     }
   },
