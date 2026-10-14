@@ -6,7 +6,7 @@
 
 GitHub Pages：<https://hkrgb.github.io/cheung-chau-walk/>（沒有 serve.py，會自動改用原圖磚網址）。
 
-後台管理員：只限 `info@rgb-workshop.com`（Firebase 專案 `cheung-chau-walk-rgb`）。
+後台管理員：只限 `info@rgb-workshop.com`（Firebase 專案 `cheung-chau-map-rgb`）。
 
 ## 如何開啟（建議）
 

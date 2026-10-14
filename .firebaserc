@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "cheung-chau-walk-rgb"
-  }
+    "default": "cheung-chau-map-rgb"
+  },
+  "targets": {},
+  "etags": {}
 }
