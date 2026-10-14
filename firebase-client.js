@@ -9,7 +9,7 @@ import {
   getFirestore, connectFirestoreEmulator, doc, getDoc, setDoc, updateDoc, deleteDoc,
   collection, query, where, getDocs, serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { firebaseConfig, SCHOOL_DOMAIN } from "./firebase-config.js";
+import { firebaseConfig, ADMIN_EMAIL, SCHOOL_DOMAIN } from "./firebase-config.js";
 
 /* 本機測試：在 localhost 網址加 ?emu=1 便改用 Auth / Firestore 模擬器（不會碰正式資料） */
 const LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
@@ -33,7 +33,7 @@ export const LIMITS = {
 
 export function isSchoolUser(user) {
   return !!(user && user.email && user.emailVerified &&
-    user.email.toLowerCase().endsWith("@" + SCHOOL_DOMAIN));
+    user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
 }
 
 /* 登入狀態：非學校帳戶或電郵未驗證會被即時登出，並把原因傳給 callback */
@@ -43,7 +43,7 @@ export function watchAuth(callback) {
     if (user && !isSchoolUser(user)) {
       const email = user.email || "（沒有電郵）";
       await signOut(auth);
-      callback(null, `只限 ${SCHOOL_DOMAIN} 學校 Google 帳戶使用。你剛才以 ${email} 登入，已自動登出。`);
+      callback(null, `只限 ${ADMIN_EMAIL} 登入後台。你剛才以 ${email} 登入，已自動登出。`);
       return;
     }
     callback(user, "");
@@ -88,7 +88,7 @@ export function friendlyAuthError(error) {
 
 export function friendlyDbError(error) {
   const code = (error && error.code) || "";
-  if (code === "permission-denied") return "沒有權限（可能未登入、帳戶不是學校帳戶，或地圖不屬於你）。";
+  if (code === "permission-denied") return "沒有權限（可能未登入、帳戶不是授權管理員，或地圖不屬於你）。";
   if (code === "unavailable") return "暫時連不上資料庫，請檢查網絡後再試。";
   if (code === "resource-exhausted") return "今日的免費資料庫用量已滿，請明天再試。";
   if (code === "invalid-argument") return "資料過大或格式不正確（單一地圖文件上限約 1 MB）。";

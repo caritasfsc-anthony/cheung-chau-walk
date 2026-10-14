@@ -13,7 +13,7 @@ rules_version = '2';
 //   - description: string (required, 0–2000)
 //   - ownerUid: string (required, immutable, == creator's auth uid)
 //   - ownerEmail: string (required, == creator's verified token email, immutable)
-//       注意：公開地圖文件人人可讀，ownerEmail 亦會隨之可讀（學校電郵）；檢視頁不顯示。
+//       注意：公開地圖文件人人可讀，ownerEmail 亦會隨之可讀（管理員電郵）；檢視頁不顯示。
 //   - ownerName: string (required, 0–100)
 //   - published: bool (required)
 //   - visibility: string (required, 'public' | 'school')
@@ -36,7 +36,7 @@ rules_version = '2';
 //   - updatedAt: timestamp (== request.time on every write)
 //
 // 存取原則
-//   - 只限 caritasfsc.edu.hk、電郵已驗證、經 Google 登入的帳戶可建立及管理地圖。
+//   - 只限 info@rgb-workshop.com（電郵已驗證、經 Google 登入）可建立及管理地圖。
 //   - 地圖只有擁有人可修改或刪除；擁有欄位不可改。
 //   - 讀取：擁有人；或已發佈且 visibility == 'public'（任何人）；
 //     或已發佈且 visibility == 'school'（學校帳戶）。
@@ -56,7 +56,7 @@ service cloud.firestore {
       return isAuthenticated()
         && request.auth.token.email_verified == true
         && request.auth.token.email is string
-        && request.auth.token.email.matches('.*@caritasfsc[.]edu[.]hk$')
+        && request.auth.token.email == 'info@rgb-workshop.com'
         && request.auth.token.firebase.sign_in_provider == 'google.com';
     }
 
