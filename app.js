@@ -1,6 +1,6 @@
 /* 長洲足印：檢視頁
-   index.html            → 內置空殼地圖（routes-data.js，無預設路線）
-   index.html?map=<id>   → 後台在 Firestore 製作的地圖
+   index.html            → 內置長洲路線（routes-data.js）
+   index.html?map=<id>   → 老師在 Firestore 製作的地圖
    兩者都轉成同一個 site 物件，由下面同一套顯示程式處理。 */
 
 import { BUILTIN_SITE } from "./routes-data.js";
@@ -9,7 +9,7 @@ import { initServices, applyServices } from "./poi.js";
 import { initSaved } from "./saved.js";
 import {
   tiles, detectProxy, createMap, enableTerrain as addTerrain, routeCoords, setRouteLine,
-  clearRouteLine, esc, safeColor, switchStyle, currentKind
+  clearRouteLine, esc, safeColor, switchStyle, currentKind, probeHandMap, ensureHandMapStyle
 } from "./map-core.js";
 
 const routesEl = document.getElementById("routes");
@@ -59,7 +59,7 @@ const shortDuration = (route) => String(route.duration || "").replace(/（.*）/
 const routeFacts = (route) => [route.area, route.duration, route.stops.length + " 站"].filter(Boolean).join(" · ");
 const thumbHtml = (stop) => stop.photo ? `<img class="stop-thumb" src="${esc(stop.photo.src)}" alt="" loading="lazy" />` : "";
 
-/* 刊頭：內置版本與後台地圖共用 */
+/* 刊頭：內置版本與老師地圖共用 */
 function renderMast() {
   document.getElementById("mast-seal").textContent = site.seal;
   document.getElementById("mast-eyebrow").textContent = site.eyebrow;
@@ -424,7 +424,7 @@ function openDetail(route, index) {
   }
 
   let source;
-  if (!site.builtin) source = "位置由管理員標示，屬約數";
+  if (!site.builtin) source = "位置由製作老師標示，屬約數";
   else source = route.credit
     ? (stop.approx ? "位置按路線圖估計，屬約數" : "座標取自開放街圖，屬約數") + " · 指示文字取自路線圖"
     : "只收錄已核對的公開記述";
@@ -514,9 +514,15 @@ function startMap() {
     onLoad: (m, entry) => {
       styleReady = true;
       const note = document.getElementById("map-note");
-      note.textContent = addTerrain(m, isMobile() ? 1.45 : 1.85)
-        ? "已開啟地形與傾斜鏡頭；建築立體見於較大比例"
-        : "地形圖磚未能載入，仍以傾斜鏡頭觀看";
+      if (entry.kind === "handmap") {
+        try { m.setTerrain(null); } catch (e) { /* ignore */ }
+        note.textContent = "手繪底圖 · 路線與站點疊在圖上（座標為約數）";
+      } else {
+        note.textContent = addTerrain(m, isMobile() ? 1.45 : 1.85)
+          ? "已開啟地形與傾斜鏡頭；建築立體見於較大比例"
+          : "地形圖磚未能載入，仍以傾斜鏡頭觀看";
+        if (entry.kind === "sketch") note.textContent = "手繪風格底圖 · OpenFreeMap 矢量（免 API key）";
+      }
       if (tiles.proxyMode && entry.proxied) note.textContent += " · 經本機代理載入圖磚";
       syncStyleSwitch();
       applyServices(m);
@@ -579,17 +585,21 @@ locateBtn.addEventListener("click", () => {
   }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
 });
 
-/* 底圖切換：地圖 / 航照 / OSM；換樣式後重加地形與路線（標記為 DOM，不受影響） */
+/* 底圖切換：標準 / 地圖 / 航照 / 手繪風 / 手繪圖；換樣式後重加地形與路線（標記為 DOM，不受影響） */
 function syncStyleSwitch() {
   const kind = currentKind(map);
   document.querySelectorAll("#style-switch button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
 }
 document.querySelectorAll("#style-switch button").forEach((btn) => btn.addEventListener("click", () => {
-  if (!map || !styleReady || currentKind(map) === btn.dataset.kind) return;
+  if (!map || !styleReady || btn.hidden || currentKind(map) === btn.dataset.kind) return;
   styleReady = false;
-  switchStyle(map, btn.dataset.kind, (m) => {
+  switchStyle(map, btn.dataset.kind, (m, entry) => {
     styleReady = true;
-    addTerrain(m, isMobile() ? 1.45 : 1.85);
+    if (entry && entry.kind === "handmap") {
+      try { m.setTerrain(null); } catch (e) { /* ignore */ }
+    } else {
+      addTerrain(m, isMobile() ? 1.45 : 1.85);
+    }
     if (activeRoute) setRouteLine(m, routeCoords(activeRoute), safeColor(activeRoute.color));
     applyServices(m);
     syncStyleSwitch();
@@ -603,7 +613,7 @@ window.addEventListener("resize", () => {
 MOBILE_MQ.addEventListener("change", applyMode);
 LANDSCAPE_MQ.addEventListener("change", applyMode);
 
-/* ---------- 後台地圖：由 Firestore 讀取 ---------- */
+/* ---------- 老師地圖：由 Firestore 讀取 ---------- */
 function showGate({ title, text, signIn = false, error = "" }) {
   gateEl.hidden = false;
   document.getElementById("gate-title").textContent = title;
@@ -632,7 +642,7 @@ async function loadRemoteSite(mapId) {
       signInBtn.disabled = true;
       const msg = await fb.signInSchool();
       signInBtn.disabled = false;
-      if (msg) showGate({ title: "需要登入", text: "此地圖尚未發佈，或只限管理員查看。", signIn: true, error: msg });
+      if (msg) showGate({ title: "需要學校帳戶登入", text: "此地圖只限學校帳戶查看，或尚未發佈。", signIn: true, error: msg });
     };
     fb.watchAuth(async (user, message) => {
       if (message) authMessage = message;
@@ -658,13 +668,13 @@ async function loadRemoteSite(mapId) {
         if (error && error.code === "permission-denied") {
           if (!user) {
             showGate({
-              title: "需要登入",
-              text: "此地圖尚未發佈，或只限管理員查看。請以 info@rgb-workshop.com 登入。",
+              title: "需要學校帳戶登入",
+              text: "此地圖只限學校帳戶查看，或尚未發佈。請以 @caritasfsc.edu.hk 學校 Google 帳戶登入。",
               signIn: true,
               error: authMessage
             });
           } else {
-            showGate({ title: "未能查看這張地圖", text: "地圖尚未發佈，或你沒有查看權限。如有需要，請聯絡地圖管理員。" });
+            showGate({ title: "未能查看這張地圖", text: "地圖尚未發佈，或你沒有查看權限。如有需要，請聯絡製作的老師。" });
           }
         } else {
           showGate({ title: "未能讀取地圖", text: fb.friendlyDbError(error) });
@@ -695,6 +705,11 @@ async function main() {
     applyMode();
   }
   await detectProxy();
+  if (await probeHandMap()) {
+    ensureHandMapStyle();
+    const handBtn = document.querySelector("#style-switch button[data-kind='handmap']");
+    if (handBtn) handBtn.hidden = false;
+  }
   startMap();
 }
 

@@ -291,20 +291,24 @@ h1 {
 
 #style-switch {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: min(100%, 420px);
   background: rgba(18, 14, 11, 0.88);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 16px;
   overflow: hidden;
 }
 #style-switch button {
   background: transparent;
   color: var(--paper);
   border: 0;
-  padding: 6px 12px;
+  padding: 6px 10px;
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
 }
+#style-switch button[hidden] { display: none; }
 #style-switch button[aria-pressed="true"] { background: var(--gold); color: #1a120e; }
 
 #map-note {
@@ -635,7 +639,8 @@ h1 {
     gap: 6px;
   }
   #style-switch { order: 2; }
-  #style-switch button { min-height: 36px; font-size: 14px; }
+  #style-switch { max-width: min(100%, 280px); border-radius: 14px; }
+  #style-switch button { min-height: 36px; font-size: 13px; padding: 6px 8px; }
   #reset-view, #locate-me, #ferry-toggle, .svc-btn, #saved-toggle {
     min-height: 44px;
     padding: 0 16px;
